@@ -1,0 +1,144 @@
+/* Fondo difuminado elegante para la página de login */
+body {
+    background: linear-gradient(135deg, #4A90E2, #9013FE); /* Gradiente elegante */
+    background-size: 400% 400%; /* Escala el fondo para un efecto más dinámico */
+    animation: gradientAnimation 15s ease infinite; /* Animación suave del gradiente */
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Animación para el gradiente */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Contenedor del login */
+.login-container {
+    background-color: rgba(255, 255, 255, 0.85); /* Fondo semitransparente */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 400px;
+    text-align: center;
+}
+
+/* Estilo de títulos y textos */
+.login-form h2 {
+    color: #007BFF;
+    margin-bottom: 1rem;
+}
+
+.login-form p {
+    color: #777777;
+    margin-bottom: 2rem;
+}
+
+/* Estilo de los campos de entrada */
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333333;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 80%; /* Ancho del campo de entrada ajustado para centrarse */
+    padding: 0.75rem;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin: 0 auto; /* Centra el campo de entrada */
+    display: block;
+}
+
+/* Estilo del enlace de "Forgot Password" */
+.forgot-password {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #007BFF;
+    text-align: right;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Estilo del botón de login */
+.login-button {
+    background-color: #FF3B30;
+    color: #ffffff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.login-button:hover {
+    background-color: #e32c28;
+}
+
+/* Estilo del enlace de registro */
+.signup-link {
+    margin-top: 2rem;
+}
+
+.signup-link a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo de los botones sociales */
+.social-login {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+}
+
+.social-button {
+    background-color: #f4f4f4;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #555555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-button:hover {
+    background-color: #e4e4e4;
+}
+
+.google {
+    color: #db4437;
+}
+
+.facebook {
+    color: #4267B2;
+}
+
+.twitter {
+    color: #1DA1F2;
+}

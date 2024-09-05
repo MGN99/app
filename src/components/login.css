@@ -1,15 +1,5 @@
 /* Fondo difuminado elegante para la página de login */
-body {
-    background: linear-gradient(135deg, #4A90E2, #9013FE); /* Gradiente elegante */
-    background-size: 400% 400%; /* Escala el fondo para un efecto más dinámico */
-    animation: gradientAnimation 15s ease infinite; /* Animación suave del gradiente */
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+
 
 /* Animación para el gradiente */
 @keyframes gradientAnimation {
@@ -131,14 +121,5 @@ body {
     background-color: #e4e4e4;
 }
 
-.google {
-    color: #db4437;
-}
 
-.facebook {
-    color: #4267B2;
-}
 
-.twitter {
-    color: #1DA1F2;
-}

@@ -7,7 +7,7 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Aquí puedes manejar la lógica de autenticación
+        // Logica para logear
         console.log('Email:', email);
         console.log('Password:', password);
     };
@@ -42,7 +42,7 @@ const Login = () => {
                     <button type="submit" className="login-button">Login Now</button>
                 </form>
                 <div className="signup-link">
-                    <p>If You Don’t Have An Account Please, <a href="#">Sign Up Now</a></p>
+                    <p>If You Don’t Have An Account Please, <a href="register">Sign Up Now</a></p>
                 </div>
                
             </div>

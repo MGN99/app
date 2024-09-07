@@ -7,7 +7,9 @@ body {
   transition: background-color 0.3s ease;
 }
 
-h1, h2, p {
+h1,
+h2,
+p {
   margin: 0;
   transition: color 0.3s ease;
 }
@@ -29,7 +31,8 @@ h1, h2, p {
 }
 
 .logo h1:hover {
-  transform: scale(1.05); /* Efecto hover para el logo */
+  transform: scale(1.05);
+  /* Efecto hover para el logo */
 }
 
 .search-container {
@@ -66,8 +69,10 @@ h1, h2, p {
 }
 
 .nav-buttons .btn:hover {
-  background-color: #0056b3; /* Color más oscuro al hover */
-  transform: scale(1.05); /* Crece ligeramente al hover */
+  background-color: #0056b3;
+  /* Color más oscuro al hover */
+  transform: scale(1.05);
+  /* Crece ligeramente al hover */
   opacity: 0.9;
 }
 
@@ -90,7 +95,8 @@ h1, h2, p {
 
 .categories-nav .category:hover {
   text-decoration: underline;
-  color: #0056b3; /* Color más oscuro al hover */
+  color: #0056b3;
+  /* Color más oscuro al hover */
 }
 
 /* Main section */
@@ -157,7 +163,8 @@ h1, h2, p {
 
 .course-card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  transform: translateY(-5px); /* Eleva ligeramente la tarjeta */
+  transform: translateY(-5px);
+  /* Eleva ligeramente la tarjeta */
 }
 
 .course-image {
@@ -169,7 +176,8 @@ h1, h2, p {
 }
 
 .course-card:hover .course-image {
-  transform: scale(1.05); /* Efecto de zoom suave */
+  transform: scale(1.05);
+  /* Efecto de zoom suave */
 }
 
 .course-card h3 {
@@ -180,7 +188,8 @@ h1, h2, p {
 }
 
 .course-card:hover h3 {
-  color: #007bff; /* Color del título cambia al hover */
+  color: #007bff;
+  /* Color del título cambia al hover */
 }
 
 .course-card p {
@@ -211,4 +220,28 @@ h1, h2, p {
   color: #777;
   margin-top: 2rem;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.filter-section {
+  margin: 20px 0;
+  /* Espacio entre las pestañas y los cursos */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-section label {
+  font-size: 16px;
+}
+
+.filter-section select {
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.courses-grid {
+  margin-top: 30px;
+  /* Baja los cursos para que quepa el filtro */
 }

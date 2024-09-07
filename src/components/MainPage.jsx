@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MainPage.css';
+import courses from './Coursesdata'; // Importa los datos
 
 const MainPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [priceOrder, setPriceOrder] = useState('');
+
+  // Filtrar y ordenar cursos
+  const filteredCourses = courses
+    .filter(course => {
+      if (selectedCategory === '') return true;
+      return course.category === selectedCategory;
+    })
+    .sort((a, b) => {
+      if (priceOrder === 'asc') return parseFloat(a.price) - parseFloat(b.price);
+      if (priceOrder === 'desc') return parseFloat(b.price) - parseFloat(a.price);
+      return 0;
+    });
+
   return (
     <div className="main-container">
       {/* Header */}
@@ -18,19 +34,38 @@ const MainPage = () => {
           />
         </div>
         <div className="nav-buttons">
-        <Link to="/login" className="btn">Login</Link>
-        <Link to="/register" className="btn register-btn">Register</Link>
+          <Link to="/login" className="btn">Login</Link>
+          <Link to="/register" className="btn register-btn">Register</Link>
         </div>
       </header>
 
-      {/* Categories Tabs */}
-      <nav className="categories-nav">
-        <Link to="#" className="category">Desarrollo web</Link>
-        <Link to="#" className="category">Ciencias de la información</Link>
-        <Link to="#" className="category">Desarrollo móvil</Link>
-        <Link to="#" className="category">Lenguajes de programación</Link>
-        <Link to="#" className="category">Testeo de software</Link>
-      </nav>
+      {/* Filter Section (sección actualizada) */}
+      <div className="filter-section">
+        {/* Filtro por tipo (categoría) */}
+        <label htmlFor="categoryFilter">Filtrar por tipo:</label>
+        <select
+          id="categoryFilter"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="">Todos</option>
+          <option value="Programación">Programación</option>
+          <option value="Cocina">Cocina</option>
+          <option value="Música">Música</option>
+        </select>
+
+        {/* Filtro por precio */}
+        <label htmlFor="priceOrder">Ordenar por precio:</label>
+        <select
+          id="priceOrder"
+          value={priceOrder}
+          onChange={(e) => setPriceOrder(e.target.value)}
+        >
+          <option value="">Seleccionar</option>
+          <option value="asc">Menor a mayor</option>
+          <option value="desc">Mayor a menor</option>
+        </select>
+      </div>
 
       {/* Main Section */}
       <section className="main-section">
@@ -38,46 +73,21 @@ const MainPage = () => {
         <p>Cursos para dar tus primeros pasos</p>
         <p>Descubre cursos de expertos experimentados del mundo real.</p>
 
-        {/* Tabs for filtering */}
-        <div className="tabs-container">
-          <button className="tab-btn active">Más populares</button>
-          <button className="tab-btn">Nuevo</button>
-          <button className="tab-btn">Populares</button>
-        </div>
-
         {/* Courses Grid */}
         <div className="courses-grid">
-          <div className="course-card">
-            <img src="https://via.placeholder.com/150" alt="Course" className="course-image" />
-            <h3>Introducción a JavaScript</h3>
-            <p>Carlos Solis</p>
-            <p className="price">9.990 CLP</p>
-            <p className="discounted-price">24.990 CLP</p>
-          </div>
-
-          <div className="course-card">
-            <img src="https://via.placeholder.com/150" alt="Course" className="course-image" />
-            <h3>Todo jQuery... de novato a experto</h3>
-            <p>Francisco Javier Arce Anguiano</p>
-            <p className="price">9.990 CLP</p>
-            <p className="discounted-price">31.990 CLP</p>
-          </div>
-
-          <div className="course-card">
-            <img src="https://via.placeholder.com/150" alt="Course" className="course-image" />
-            <h3>Introducción a HTML y CSS</h3>
-            <p>Francisco Javier Arce Anguiano</p>
-            <p className="price">13.990 CLP</p>
-            <p className="discounted-price">37.990 CLP</p>
-          </div>
-
-          <div className="course-card">
-            <img src="https://via.placeholder.com/150" alt="Course" className="course-image" />
-            <h3>Aprende JavaScript, HTML5 y CSS3</h3>
-            <p>Francisco Javier Arce Anguiano</p>
-            <p className="price">19.990 CLP</p>
-            <p className="discounted-price">74.990 CLP</p>
-          </div>
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map(course => (
+              <div key={course.id} className="course-card">
+                <img src={course.imageUrl} alt={course.title} className="course-image" />
+                <h3>{course.title}</h3>
+                <p>{course.instructor}</p>
+                <p className="price">{course.price}</p>
+                <p className="discounted-price">{course.discountedPrice}</p>
+              </div>
+            ))
+          ) : (
+            <p>No se encontraron cursos para esta categoría.</p>
+          )}
         </div>
       </section>
     </div>
@@ -85,3 +95,5 @@ const MainPage = () => {
 };
 
 export default MainPage;
+
+

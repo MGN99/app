@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './MainPage.css';
 import courses from './Coursesdata'; // Importa los datos
@@ -6,6 +6,22 @@ import courses from './Coursesdata'; // Importa los datos
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceOrder, setPriceOrder] = useState('');
+  const [userEmail, setUserEmail] = useState(null);
+
+  // Obtener el email del localStorage al cargar la página
+  useEffect(() => {
+    const email = localStorage.getItem('email');
+    if (email) {
+      setUserEmail(email);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Elimina el email y token de localStorage
+    localStorage.removeItem('email');
+    localStorage.removeItem('token');
+    setUserEmail(null); // Actualiza el estado para ocultar el email
+  };
 
   // Filtrar y ordenar cursos
   const filteredCourses = courses
@@ -34,8 +50,17 @@ const MainPage = () => {
           />
         </div>
         <div className="nav-buttons">
-          <Link to="/login" className="btn">Login</Link>
-          <Link to="/register" className="btn register-btn">Register</Link>
+          {userEmail ? (
+            <div className="user-info">
+              <span className="user-email">{userEmail}</span>
+              <button className="logout-button" onClick={handleLogout}>Logout</button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="btn">Login</Link>
+              <Link to="/register" className="btn register-btn">Register</Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -95,5 +120,3 @@ const MainPage = () => {
 };
 
 export default MainPage;
-
-

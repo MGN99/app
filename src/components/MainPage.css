@@ -245,3 +245,36 @@ p {
   margin-top: 30px;
   /* Baja los cursos para que quepa el filtro */
 }
+
+/* Logout Button */
+.logout-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+  /* Color más oscuro al hover */
+  transform: scale(1.05);
+  /* Crece ligeramente al hover */
+  opacity: 0.9;
+}
+
+/* Estilo para el contenedor del email y el botón */
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #007bff;
+  margin-right: 1rem;
+}

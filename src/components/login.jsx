@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Para redirigir
+import axios from 'axios'; // Asegúrate de tener axios
+import { useNavigate } from 'react-router-dom';
 import './login.css';
 
 const Login = () => {
@@ -8,25 +9,46 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate(); // Hook para redirigir
+    const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
         setError('');
 
-        // Simulación del backend
-        setTimeout(() => {
-            if (email === 'test@example.com' && password === 'password123') {
-                console.log('Login successful');
-                localStorage.setItem('token', 'mockToken123');
-                localStorage.setItem('email', email); // Guardamos el email en localStorage
-                navigate('/'); // Redirigimos al home
-            } else {
-                setError('Invalid email or password');
+        try {
+            const response = await axios.post('http://localhost:8080/graphql', {
+                query: `
+                    mutation {
+                        loginUsuario(identificador: "${email}", password: "${password}")
+                    }
+                `
+            });
+
+            const { data } = response;
+            if (data.errors) {
+                setError(data.errors[0].message);
+                setLoading(false);
+                return;
             }
+
+            // Obtener el mensaje de la respuesta del backend
+            const message = data.data.loginUsuario;
+
+            if (message === "Inicio de sesión exitoso") {
+                // Aquí podrías almacenar algo en localStorage para mantener el estado de autenticación
+                localStorage.setItem('authenticated', 'true');
+                localStorage.setItem('email', email); // Guardar el email si es necesario
+                navigate('/'); // Redirigir al home después del login exitoso
+            } else {
+                setError('Login failed');
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+            setError('Error al conectar con el servidor');
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
 
     return (

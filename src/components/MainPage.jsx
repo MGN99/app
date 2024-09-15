@@ -7,6 +7,8 @@ const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceOrder, setPriceOrder] = useState('');
   const [userEmail, setUserEmail] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null); // Estado para el curso seleccionado
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar la visibilidad del modal
 
   // Obtener el email del localStorage al cargar la página
   useEffect(() => {
@@ -17,10 +19,21 @@ const MainPage = () => {
   }, []);
 
   const handleLogout = () => {
-    // Elimina el email y token de localStorage
     localStorage.removeItem('email');
     localStorage.removeItem('token');
-    setUserEmail(null); // Actualiza el estado para ocultar el email
+    setUserEmail(null);
+  };
+
+  // Maneja la apertura del modal con los detalles del curso
+  const handleCourseClick = (course) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  // Cierra el modal
+  const closeModal = () => {
+    setSelectedCourse(null);
+    setIsModalOpen(false);
   };
 
   // Filtrar y ordenar cursos
@@ -64,9 +77,8 @@ const MainPage = () => {
         </div>
       </header>
 
-      {/* Filter Section (sección actualizada) */}
+      {/* Filter Section */}
       <div className="filter-section">
-        {/* Filtro por tipo (categoría) */}
         <label htmlFor="categoryFilter">Filtrar por tipo:</label>
         <select
           id="categoryFilter"
@@ -79,7 +91,6 @@ const MainPage = () => {
           <option value="Música">Música</option>
         </select>
 
-        {/* Filtro por precio */}
         <label htmlFor="priceOrder">Ordenar por precio:</label>
         <select
           id="priceOrder"
@@ -102,7 +113,7 @@ const MainPage = () => {
         <div className="courses-grid">
           {filteredCourses.length > 0 ? (
             filteredCourses.map(course => (
-              <div key={course.id} className="course-card">
+              <div key={course.id} className="course-card" onClick={() => handleCourseClick(course)}>
                 <img src={course.imageUrl} alt={course.title} className="course-image" />
                 <h3>{course.title}</h3>
                 <p>{course.instructor}</p>
@@ -115,6 +126,20 @@ const MainPage = () => {
           )}
         </div>
       </section>
+
+      {/* Modal */}
+      {isModalOpen && selectedCourse && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>{selectedCourse.title}</h2>
+            <p>Profesor: {selectedCourse.instructor}</p>
+            <p>Precio: {selectedCourse.price}</p>
+            <p>Descripción: {selectedCourse.description}</p>
+            <button className="add-to-cart-button">Agregar al carrito</button>
+            <button className="close-modal-button" onClick={closeModal}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

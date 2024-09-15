@@ -32,9 +32,58 @@ p {
 
 .logo h1:hover {
   transform: scale(1.05);
-  /* Efecto hover para el logo */
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.close-modal-button,
+.add-to-cart-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.close-modal-button:hover,
+.add-to-cart-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.add-to-cart-button {
+  background-color: #28a745;
+}
+
+.add-to-cart-button:hover {
+  background-color: #218838;
+}
+
+/* Search bar */
 .search-container {
   flex: 1;
   margin: 0 2rem;
@@ -52,6 +101,7 @@ p {
   border-color: #007bff;
 }
 
+/* Nav buttons */
 .nav-buttons .btn {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -70,9 +120,7 @@ p {
 
 .nav-buttons .btn:hover {
   background-color: #0056b3;
-  /* Color más oscuro al hover */
   transform: scale(1.05);
-  /* Crece ligeramente al hover */
   opacity: 0.9;
 }
 
@@ -96,7 +144,6 @@ p {
 .categories-nav .category:hover {
   text-decoration: underline;
   color: #0056b3;
-  /* Color más oscuro al hover */
 }
 
 /* Main section */
@@ -150,6 +197,7 @@ p {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
+  margin-top: 30px;
 }
 
 .course-card {
@@ -164,7 +212,6 @@ p {
 .course-card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   transform: translateY(-5px);
-  /* Eleva ligeramente la tarjeta */
 }
 
 .course-image {
@@ -177,7 +224,6 @@ p {
 
 .course-card:hover .course-image {
   transform: scale(1.05);
-  /* Efecto de zoom suave */
 }
 
 .course-card h3 {
@@ -189,7 +235,6 @@ p {
 
 .course-card:hover h3 {
   color: #007bff;
-  /* Color del título cambia al hover */
 }
 
 .course-card p {
@@ -222,9 +267,9 @@ p {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Filter Section */
 .filter-section {
   margin: 20px 0;
-  /* Espacio entre las pestañas y los cursos */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -239,11 +284,6 @@ p {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
-}
-
-.courses-grid {
-  margin-top: 30px;
-  /* Baja los cursos para que quepa el filtro */
 }
 
 /* Logout Button */
@@ -261,13 +301,11 @@ p {
 
 .logout-button:hover {
   background-color: #c82333;
-  /* Color más oscuro al hover */
   transform: scale(1.05);
-  /* Crece ligeramente al hover */
   opacity: 0.9;
 }
 
-/* Estilo para el contenedor del email y el botón */
+/* User Info Container */
 .user-info {
   display: flex;
   align-items: center;

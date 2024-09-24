@@ -7,6 +7,7 @@ import RegisterPage from './components/MainPage/RegisterPage';
 import UserDashboard from './components/PanelUser/UserDashboard';
 import AdminDashboard from './components/PanelAdmin/AdminDashboard';
 
+
 const App = () => {
     return (
         <Router>

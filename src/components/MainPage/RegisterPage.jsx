@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import './RegisterPage.css'; // Asegúrate de enlazar el archivo CSS
+import axios from 'axios'; 
+import { useNavigate } from 'react-router-dom';
+import './RegisterPage.css'; 
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
+    nameLastName: '',  
     username: '',
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -15,10 +21,47 @@ const RegisterPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí podrías implementar la lógica para enviar los datos al backend
-    console.log('Registrando:', formData);
+    setLoading(true);
+    setError('');
+
+    try {
+      // Enviar datos al backend con axios
+      const response = await axios.post('http://localhost:8080/graphql', {
+        query: `
+          mutation {
+            registerUsuario(
+              nameLastName: "${formData.nameLastName}", 
+              username: "${formData.username}", 
+              email: "${formData.email}", 
+              password: "${formData.password}"
+            ) {
+              userID
+              username
+              email
+            }
+          }
+        `
+      });
+
+      const { data } = response;
+      if (data.errors) {
+        setError(data.errors[0].message);
+        setLoading(false);
+        return;
+      }
+
+      
+      console.log('Registro exitoso:', data.data.registerUsuario);
+      navigate('/login'); 
+
+    } catch (error) {
+      console.error('Error al conectar con el servidor:', error);
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,6 +69,18 @@ const RegisterPage = () => {
       <form className="register-form" onSubmit={handleSubmit}>
         <h2>Crear una Cuenta</h2>
         <p>Por favor llena los campos para crear una cuenta nueva.</p>
+
+        <div className="form-group">
+          <label htmlFor="nameLastName">Nombre completo</label>
+          <input
+            type="text"
+            id="nameLastName"
+            name="nameLastName"
+            value={formData.nameLastName}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
         <div className="form-group">
           <label htmlFor="username">Nombre de usuario</label>
@@ -63,8 +118,10 @@ const RegisterPage = () => {
           />
         </div>
 
-        <button type="submit" className="register-button">
-          Registrarse
+        {error && <p className="error">{error}</p>}
+
+        <button type="submit" className="register-button" disabled={loading}>
+          {loading ? 'Registrando...' : 'Registrarse'}
         </button>
 
         <div className="login-link">

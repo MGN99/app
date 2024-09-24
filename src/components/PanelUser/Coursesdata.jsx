@@ -7,7 +7,8 @@ const courses = [
         price: "9.990 CLP",
         discountedPrice: "24.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Programación"
+        category: "Programación",
+        description: "Aprende los conceptos básicos de JavaScript y comienza a programar tus propias aplicaciones web."
     },
     {
         id: 2,
@@ -16,7 +17,8 @@ const courses = [
         price: "9.990 CLP",
         discountedPrice: "31.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Programación"
+        category: "Programación",
+        description: "Aprende a utilizar jQuery para crear sitios web interactivos y dinámicos."
     },
     {
         id: 3,
@@ -25,7 +27,8 @@ const courses = [
         price: "13.990 CLP",
         discountedPrice: "37.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Programación"
+        category: "Programación",
+        description: "Aprende a crear sitios web desde cero utilizando HTML y CSS."
     },
     {
         id: 4,
@@ -34,7 +37,10 @@ const courses = [
         price: "19.990 CLP",
         discountedPrice: "74.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Cocina"
+        category: "Cocina",
+        description: "Aprende a preparar los platos más deliciosos de la cocina italiana con este curso completo."
+
+
     },
     {
         id: 5,
@@ -43,7 +49,8 @@ const courses = [
         price: "9.990 CLP",
         discountedPrice: "24.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Cocina"
+        category: "Cocina",
+        description: "Descubre los secretos de la cocina mexicana con este curso completo de cocina tradicional."
     },
     {
         id: 6,
@@ -52,7 +59,8 @@ const courses = [
         price: "9.990 CLP",
         discountedPrice: "31.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Cocina"
+        category: "Cocina",
+        description: "Aprende a preparar los mejores platos de la cocina japonesa con este curso completo."
     },
     {
         id: 7,
@@ -61,7 +69,8 @@ const courses = [
         price: "13.990 CLP",
         discountedPrice: "37.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Música"
+        category: "Música",
+        description: "Aprende a tocar la guitarra eléctrica con este curso completo para principiantes."
     },
     {
         id: 8,
@@ -70,7 +79,8 @@ const courses = [
         price: "19.990 CLP",
         discountedPrice: "74.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Música"
+        category: "Música",
+        description: "Aprende a tocar el piano con este curso completo para principiantes."
     },
     {
         id: 9,
@@ -79,7 +89,8 @@ const courses = [
         price: "19.990 CLP",
         discountedPrice: "74.990 CLP",
         imageUrl: "https://via.placeholder.com/150",
-        category: "Música"
+        category: "Música",
+        description: "Aprende a tocar la batería con este curso completo para principiantes."
     }
 ];
 

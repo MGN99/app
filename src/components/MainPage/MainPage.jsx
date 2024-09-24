@@ -144,4 +144,8 @@ const MainPage = () => {
   );
 };
 
+<<<<<<< HEAD
 export default MainPage;
+=======
+export default MainPage;
+>>>>>>> 1c4fcc3e8107fa59ddb9fc15de4b1950ef4b2dd5

@@ -39,7 +39,11 @@ const Login = () => {
                 // Aquí podrías almacenar algo en localStorage para mantener el estado de autenticación
                 localStorage.setItem('authenticated', 'true');
                 localStorage.setItem('email', email); // Guardar el email si es necesario
+<<<<<<< HEAD
                 navigate('/dashboard'); // Redirigir al home después del login exitoso
+=======
+                navigate('/'); // Redirigir al home después del login exitoso
+>>>>>>> 1c4fcc3e8107fa59ddb9fc15de4b1950ef4b2dd5
             } else {
                 setError('Login failed');
             }

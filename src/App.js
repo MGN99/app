@@ -9,6 +9,17 @@ import AdminDashboard from './components/PanelAdmin/AdminDashboard';
 
 
 const App = () => {
+<<<<<<< HEAD
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    </Router>
+  );
+=======
     return (
         <Router>
             <Routes>
@@ -20,6 +31,7 @@ const App = () => {
             </Routes>
         </Router>
     );
+>>>>>>> 4ef8d994b3450eb1287c7749aee8d6ec7597de8b
 };
 
 export default App;

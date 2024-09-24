@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MainPage.css';
-import courses from './Coursesdata'; // Importa los datos
+import courses from '../PanelUser/Coursesdata'; // Importa los datos
 
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');

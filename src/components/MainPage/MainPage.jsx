@@ -38,7 +38,7 @@ const MainPage = () => {
 
   // Filtrar y ordenar cursos
   const filteredCourses = courses
-    .filter(course => {
+    .filter((course) => {
       if (selectedCategory === '') return true;
       return course.category === selectedCategory;
     })
@@ -62,81 +62,55 @@ const MainPage = () => {
             className="search-bar"
           />
         </div>
-        <div className="nav-buttons">
+        <div className="user-info">
           {userEmail ? (
-            <div className="user-info">
-              <span className="user-email">{userEmail}</span>
-              <button className="logout-button" onClick={handleLogout}>Logout</button>
+            <div>
+              <span>Welcome, {userEmail}</span>
+              <button onClick={handleLogout}>Logout</button>
             </div>
           ) : (
-            <>
-              <Link to="/login" className="btn">Login</Link>
-              <Link to="/register" className="btn register-btn">Register</Link>
-            </>
+            <Link to="/login">Login</Link>
           )}
         </div>
       </header>
 
-      {/* Filter Section */}
-      <div className="filter-section">
-        <label htmlFor="categoryFilter">Filtrar por tipo:</label>
-        <select
-          id="categoryFilter"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">Todos</option>
-          <option value="Programación">Programación</option>
-          <option value="Cocina">Cocina</option>
-          <option value="Música">Música</option>
-        </select>
-
-        <label htmlFor="priceOrder">Ordenar por precio:</label>
-        <select
-          id="priceOrder"
-          value={priceOrder}
-          onChange={(e) => setPriceOrder(e.target.value)}
-        >
-          <option value="">Seleccionar</option>
-          <option value="asc">Menor a mayor</option>
-          <option value="desc">Mayor a menor</option>
-        </select>
-      </div>
-
-      {/* Main Section */}
-      <section className="main-section">
-        <h2>Cursos de Desarrollo</h2>
-        <p>Cursos para dar tus primeros pasos</p>
-        <p>Descubre cursos de expertos experimentados del mundo real.</p>
-
-        {/* Courses Grid */}
-        <div className="courses-grid">
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map(course => (
-              <div key={course.id} className="course-card" onClick={() => handleCourseClick(course)}>
-                <img src={course.imageUrl} alt={course.title} className="course-image" />
-                <h3>{course.title}</h3>
-                <p>{course.instructor}</p>
-                <p className="price">{course.price}</p>
-                <p className="discounted-price">{course.discountedPrice}</p>
-              </div>
-            ))
-          ) : (
-            <p>No se encontraron cursos para esta categoría.</p>
-          )}
+      {/* Contenido principal */}
+      <main>
+        <h2>Cursos Disponibles</h2>
+        <div className="filters">
+          <select onChange={(e) => setSelectedCategory(e.target.value)}>
+            <option value="">Todas las Categorías</option>
+            {/* Añade más opciones según las categorías disponibles */}
+          </select>
+          <select onChange={(e) => setPriceOrder(e.target.value)}>
+            <option value="">Ordenar por Precio</option>
+            <option value="asc">Ascendente</option>
+            <option value="desc">Descendente</option>
+          </select>
         </div>
-      </section>
 
-      {/* Modal */}
+        <div className="course-list">
+          {filteredCourses.map((course) => (
+            <div
+              key={course.id}
+              className="course-item"
+              onClick={() => handleCourseClick(course)}
+            >
+              <h3>{course.title}</h3>
+              <p>{course.description}</p>
+              <p>Precio: {course.price}</p>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Modal para mostrar detalles del curso */}
       {isModalOpen && selectedCourse && (
-        <div className="modal-overlay">
+        <div className="modal">
           <div className="modal-content">
-            <h2>{selectedCourse.title}</h2>
-            <p>Profesor: {selectedCourse.instructor}</p>
-            <p>Precio: {selectedCourse.price}</p>
-            <p>Descripción: {selectedCourse.description}</p>
-            <button className="add-to-cart-button">Agregar al carrito</button>
-            <button className="close-modal-button" onClick={closeModal}>Cerrar</button>
+            <h3>{selectedCourse.title}</h3>
+            <p>{selectedCourse.description}</p>
+            <button onClick={closeModal}>Cerrar</button>
           </div>
         </div>
       )}
@@ -144,8 +118,4 @@ const MainPage = () => {
   );
 };
 
-<<<<<<< HEAD
 export default MainPage;
-=======
-export default MainPage;
->>>>>>> 1c4fcc3e8107fa59ddb9fc15de4b1950ef4b2dd5

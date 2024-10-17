@@ -1,7 +1,41 @@
 import React, { useState } from 'react';
 import axios from 'axios'; 
 import { useNavigate } from 'react-router-dom';
-import './RegisterPage.css'; 
+import {
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  Box,
+  Grid,
+  Link,
+  Paper,
+} from '@mui/material';
+import { styled } from '@mui/system';
+
+const StyledButton = styled(Button)({
+  background: 'linear-gradient(45deg, #1F3B60 30%, #122841 90%)',
+  border: 0,
+  borderRadius: 30,
+  boxShadow: '0 3px 5px 2px rgba(31, 59, 96, .3)',
+  color: 'white',
+  height: 48,
+  padding: '0 30px',
+  '&:hover': {
+    backgroundColor: '#122841',
+  },
+});
+
+const StyledBackground = styled(Box)({
+  height: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundImage: `linear-gradient(to top, #003366, #00509E)`,
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+});
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -27,7 +61,6 @@ const RegisterPage = () => {
     setError('');
 
     try {
-      // Enviar datos al backend con axios
       const response = await axios.post('http://localhost:8080/graphql', {
         query: `
           mutation {
@@ -52,7 +85,6 @@ const RegisterPage = () => {
         return;
       }
 
-      
       console.log('Registro exitoso:', data.data.registerUsuario);
       navigate('/login'); 
 
@@ -65,70 +97,91 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-container">
-      <form className="register-form" onSubmit={handleSubmit}>
-        <h2>Crear una Cuenta</h2>
-        <p>Por favor llena los campos para crear una cuenta nueva.</p>
-
-        <div className="form-group">
-          <label htmlFor="nameLastName">Nombre completo</label>
-          <input
-            type="text"
-            id="nameLastName"
+    <StyledBackground>
+      <Paper
+        elevation={10}
+        sx={{
+          p: 4,
+          backgroundColor: '#fff',
+          borderRadius: '20px',
+          maxWidth: '400px',
+          width: '100%',
+          boxShadow: '0 20px 30px rgba(0, 0, 0, 0.2)',
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h4" gutterBottom color="#1F3B60" fontWeight="600">
+          Crear una Cuenta
+        </Typography>
+        <Typography variant="body2" gutterBottom color="#555">
+          Por favor llena los campos para crear una cuenta nueva
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            label="Nombre completo"
+            variant="outlined"
+            fullWidth
             name="nameLastName"
             value={formData.nameLastName}
             onChange={handleChange}
+            sx={{ mb: 2 }}
             required
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="username">Nombre de usuario</label>
-          <input
-            type="text"
-            id="username"
+          <TextField
+            label="Nombre de usuario"
+            variant="outlined"
+            fullWidth
             name="username"
             value={formData.username}
             onChange={handleChange}
+            sx={{ mb: 2 }}
             required
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Correo electrónico</label>
-          <input
+          <TextField
+            label="Correo electrónico"
+            variant="outlined"
             type="email"
-            id="email"
+            fullWidth
             name="email"
             value={formData.email}
             onChange={handleChange}
+            sx={{ mb: 2 }}
             required
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Contraseña</label>
-          <input
+          <TextField
+            label="Contraseña"
+            variant="outlined"
             type="password"
-            id="password"
+            fullWidth
             name="password"
             value={formData.password}
             onChange={handleChange}
+            sx={{ mb: 2 }}
             required
           />
-        </div>
-
-        {error && <p className="error">{error}</p>}
-
-        <button type="submit" className="register-button" disabled={loading}>
-          {loading ? 'Registrando...' : 'Registrarse'}
-        </button>
-
-        <div className="login-link">
-          ¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a>
-        </div>
-      </form>
-    </div>
+          {error && (
+            <Typography sx={{ color: 'error.main', mt: 2 }} variant="body2">
+              {error}
+            </Typography>
+          )}
+          <StyledButton
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={loading}
+            sx={{ mt: 3 }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Registrarse'}
+          </StyledButton>
+          <Typography variant="body2" align="center" sx={{ mt: 3, color: '#555' }}>
+            ¿Ya tienes una cuenta?{' '}
+            <Link href="/login" variant="body2" sx={{ color: '#1F3B60' }}>
+              Inicia sesión aquí
+            </Link>
+          </Typography>
+        </Box>
+      </Paper>
+    </StyledBackground>
   );
 };
 

@@ -15,8 +15,10 @@ import {
   Modal,
   Box,
   Container,
+  Badge, // Import Badge component
 } from '@mui/material';
-import courses from '../PanelUser/Coursesdata'; // Importar los datos de los cursos
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; 
+import courses from '../PanelUser/Coursesdata';
 
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -24,6 +26,7 @@ const MainPage = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cartItems, setCartItems] = useState(0); 
 
   useEffect(() => {
     const email = localStorage.getItem('email');
@@ -90,10 +93,14 @@ const MainPage = () => {
               }}
             />
             {userEmail ? (
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>
                   Welcome, {userEmail}
                 </Typography>
+                {/* Shopping cart icon */}
+                <Badge badgeContent={cartItems} color="secondary">
+                  <ShoppingCartIcon sx={{ cursor: 'pointer', mr: 2 }} />
+                </Badge>
                 <Button
                   color="primary"
                   onClick={handleLogout}

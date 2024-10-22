@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -9,16 +9,17 @@ import {
   Tabs,
   Tab,
   Grid,
-  Card,
-  CardContent,
-  CardMedia,
   Modal,
   Box,
   Container,
-  Badge, // Import Badge component
+  Badge,
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; 
-import courses from '../PanelUser/Coursesdata';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import axios from 'axios';
+import CourseCard from '../PanelUser/CourseCard'; // Asegúrate de que la ruta sea correcta
+import useCartStore from '../MainPage/CartStore';
+
+const API_URL = 'http://localhost:8081/graphql'; // Cambia esto a la URL de tu API
 
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -26,14 +27,43 @@ const MainPage = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [cartItems, setCartItems] = useState(0); 
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { cartItems, addToCart } = useCartStore(); // Usar el store
 
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (email) {
       setUserEmail(email);
     }
+    fetchCourses(); // Llama a la función para obtener cursos
   }, []);
+
+  const fetchCourses = async () => {
+    setLoading(true); // Establecer loading en true al inicio
+    try {
+      const response = await axios.post(API_URL, {
+        query: `
+          query {
+            cursos {
+              courseID
+              instructorID
+              title
+              description
+              price
+              category
+            }
+          }
+        `
+      });
+      setCourses(response.data.data.cursos || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    } finally {
+      setLoading(false); // Cambiar loading a false al final
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('email');
@@ -51,6 +81,11 @@ const MainPage = () => {
     setIsModalOpen(false);
   };
 
+  const handleAddToCart = () => {
+    addToCart(selectedCourse); // Usar la función de añadir al carrito
+    setIsModalOpen(false);
+  };
+
   const filteredCourses = courses
     .filter((course) => {
       if (selectedCategory === '') return true;
@@ -61,6 +96,20 @@ const MainPage = () => {
       if (priceOrder === 'desc') return parseFloat(b.price) - parseFloat(a.price);
       return 0;
     });
+
+  // Estilos para el modal
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: '8px',
+    outline: 'none',
+  };
 
   return (
     <div>
@@ -93,13 +142,23 @@ const MainPage = () => {
               }}
             />
             {userEmail ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>
                   Welcome, {userEmail}
                 </Typography>
-                {/* Shopping cart icon */}
-                <Badge badgeContent={cartItems} color="secondary">
-                  <ShoppingCartIcon sx={{ cursor: 'pointer', mr: 2 }} />
+                <Badge
+                  badgeContent={cartItems.length} // Cambiar a length para mostrar la cantidad
+                  color="secondary"
+                  sx={{ 
+                    '& .MuiBadge-badge': { 
+                      top: 10, 
+                      right: -5 
+                    } 
+                  }}
+                >
+                  <Link to="/cart">
+                    <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
+                  </Link>
                 </Badge>
                 <Button
                   color="primary"
@@ -182,51 +241,47 @@ const MainPage = () => {
 
         {/* Course List */}
         <Grid container spacing={3}>
-          {filteredCourses.map((course) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
-              <Card
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': { transform: 'scale(1.02)' },
-                }}
-                onClick={() => handleCourseClick(course)}
-              >
-                <CardMedia
-                  component="img"
-                  height="150"
-                  image="https://via.placeholder.com/150" // Placeholder de imagen
-                  alt={course.title}
+          {loading ? (
+            <Typography variant="body1">Cargando cursos...</Typography>
+          ) : (
+            filteredCourses.map((course) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={course.courseID}>
+                <CourseCard
+                  title={course.title}
+                  instructor={course.instructorID} // Cambia esto si es necesario
+                  progress={50} // Cambia esto según tu lógica para mostrar el progreso
+                  onClick={() => handleCourseClick(course)} // Llama a la función al hacer clic
                 />
-                <CardContent>
-                  <Typography variant="h6">{course.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {course.description}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {course.author}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+              </Grid>
+            ))
+          )}
         </Grid>
       </Container>
 
       {/* Modal for course details */}
-      {isModalOpen && selectedCourse && (
+      {selectedCourse && (
         <Modal open={isModalOpen} onClose={closeModal}>
-          <Box sx={{ p: 4, backgroundColor: 'white', margin: 'auto', maxWidth: 500 }}>
-            <Typography variant="h5">{selectedCourse.title}</Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
+          <Box sx={modalStyle}>
+            <Typography variant="h5" gutterBottom>
+              {selectedCourse.title}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
               {selectedCourse.description}
             </Typography>
-            <Button variant="contained" onClick={closeModal} sx={{ mt: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              Precio: ${selectedCourse.price}
+            </Typography>
+            <Button variant="contained" color="primary" onClick={handleAddToCart}>
+              Agregar al Carrito
+            </Button>
+            <Button variant="outlined" onClick={closeModal}>
               Cerrar
             </Button>
           </Box>
         </Modal>
       )}
+
+      <Outlet /> {/* Renderiza las rutas hijas aquí */}
     </div>
   );
 };

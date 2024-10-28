@@ -7,6 +7,7 @@ import UserDashboard from './components/PanelUser/UserDashboard';
 import AdminDashboard from './components/PanelAdmin/AdminDashboard';
 import ConfirmationPage from './components/ConfirmationPage';
 import CartPage from './components/MainPage/CartPage';
+import RedirectPage from './components/RedirectPage';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/adminDashboard" element={<AdminDashboard />} />
+        <Route path="/redirect" element={<RedirectPage />} />
         <Route path="/ConfirmationPage" element={<ConfirmationPage />} />
       </Routes>
     </Router>

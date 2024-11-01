@@ -1,34 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  TextField,
-  Button,
-  Box,
-  Modal,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, TextField, Button, Box, Modal, Typography, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
-const API_URL = 'http://localhost:8081/graphql'; // Cambia esto a la URL de tu API
+const API_URL = 'http://localhost:8081/graphql';
 
 export default function AdminCourses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({
@@ -60,9 +45,7 @@ export default function AdminCourses() {
           }
         `
       });
-      // Asegúrate de que estás accediendo a la ruta correcta en la respuesta
-      console.log(response.data); // Agrega este console.log para depurar
-      setCourses(response.data.data.cursos || []); // Maneja el caso donde no haya cursos
+      setCourses(response.data.data.cursos || []);
     } catch (error) {
       console.error('Error fetching courses:', error);
       setError('Error al obtener los cursos.');
@@ -70,7 +53,6 @@ export default function AdminCourses() {
       setLoading(false);
     }
   };
-  
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -80,35 +62,66 @@ export default function AdminCourses() {
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = async (course) => {
-    console.log('ID del curso a eliminar:', course.courseID); // Agrega esto
+  const handleDelete = async () => {
     try {
-        const response = await axios.post(API_URL, {
-            query: `
-                mutation {
-                    deleteCurso(courseID: "${course.courseID}") 
-                }
-            `
-        });
-
-        const { data } = response;
-        if (data.errors) {
-            setError(data.errors[0].message);
-            return;
-        }
-
-        if (data.data.deleteCurso) {
-            setCourses((prevCourses) => prevCourses.filter(c => c.courseID !== course.courseID));
-            setOpenDeleteModal(false);
-        } else {
-            setError('Error al eliminar el curso.');
-        }
-    } catch (error) {
-        console.error('Error deleting course:', error);
+      const response = await axios.post(API_URL, {
+        query: `
+          mutation {
+            deleteCursoByID(courseID: ${selectedCourse.courseID})
+          }
+        `
+      });
+      if (response.data.data.deleteCursoByID) {
+        setCourses((prevCourses) => prevCourses.filter(c => c.courseID !== selectedCourse.courseID));
+        setOpenDeleteModal(false);
+        setSelectedCourse(null);
+      } else {
         setError('Error al eliminar el curso.');
+      }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      setError('Error al eliminar el curso.');
     }
-};
+  };
 
+  const handleEditCourse = async () => {
+    try {
+      const response = await axios.post(API_URL, {
+        query: `
+          mutation {
+            updateCursoByID(
+              courseID: ${selectedCourse.courseID},
+              title: "${selectedCourse.title}",
+              description: "${selectedCourse.description}",
+              price: ${selectedCourse.price},
+              category: "${selectedCourse.category}"
+            ) {
+              courseID
+              title
+              description
+              price
+              category
+            }
+          }
+        `
+      });
+
+      if (response.data.data.updateCursoByID) {
+        setCourses((prevCourses) =>
+          prevCourses.map((c) =>
+            c.courseID === selectedCourse.courseID ? response.data.data.updateCursoByID : c
+          )
+        );
+        setOpenEditModal(false);
+        setSelectedCourse(null);
+      } else {
+        setError('Error al actualizar el curso.');
+      }
+    } catch (error) {
+      console.error('Error updating course:', error);
+      setError('Error al actualizar el curso.');
+    }
+  };
 
   const handleCreateCourse = async () => {
     try {
@@ -124,7 +137,6 @@ export default function AdminCourses() {
             ) {
               courseID
               title
-              instructorID
               description
               price
               category
@@ -133,21 +145,13 @@ export default function AdminCourses() {
         `
       });
 
-      const { data } = response;
-      if (data.errors) {
-        setError(data.errors[0].message);
-        return;
+      if (response.data.data.createCurso) {
+        setCourses((prevCourses) => [...prevCourses, response.data.data.createCurso]);
+        setOpenCreateModal(false);
+        setNewCourse({ instructorID: '', title: '', description: '', price: '', category: '' });
+      } else {
+        setError('Error al crear el curso.');
       }
-
-      setCourses((prevCourses) => [...prevCourses, data.data.createCurso]);
-      setOpenCreateModal(false);
-      setNewCourse({
-        instructorID: '',
-        title: '',
-        description: '',
-        price: '',
-        category: ''
-      });
     } catch (error) {
       console.error('Error creating course:', error);
       setError('Error al crear el curso.');
@@ -187,7 +191,6 @@ export default function AdminCourses() {
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
-                <TableCell>Instructor ID</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Price</TableCell>
                 <TableCell>Category</TableCell>
@@ -198,18 +201,18 @@ export default function AdminCourses() {
               {filteredCourses.map((course) => (
                 <TableRow key={course.courseID}>
                   <TableCell>{course.title}</TableCell>
-                  <TableCell>{course.instructorID}</TableCell>
                   <TableCell>{course.description}</TableCell>
                   <TableCell>${course.price.toFixed(2)}</TableCell>
                   <TableCell>{course.category}</TableCell>
                   <TableCell>
-                    <IconButton>
+                    <IconButton onClick={() => {
+                      setSelectedCourse(course);
+                      setOpenEditModal(true);
+                    }}>
                       <EditIcon />
                     </IconButton>
                     <IconButton onClick={() => {
-                      console.log('Curso seleccionado para eliminar:', course);
                       setSelectedCourse(course);
-                      console.log('Curso seleccionado:', course);
                       setOpenDeleteModal(true);
                     }}>
                       <DeleteIcon />
@@ -222,37 +225,16 @@ export default function AdminCourses() {
         </TableContainer>
       )}
 
-      {/* Modal for Confirming Deletion */}
-      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+      {/* Modal for Editing Course */}
+      <Modal open={openEditModal} onClose={() => setOpenEditModal(false)}>
         <Box sx={{ padding: 4, backgroundColor: 'white', margin: 'auto', maxWidth: 400 }}>
-          <Typography variant="h6">Confirm Delete</Typography>
-          <Typography variant="body1">Are you sure you want to delete this course?</Typography>
-          <Box sx={{ marginTop: 2 }}>
-            <Button variant="contained" color="primary" onClick={() => handleDelete(selectedCourse)}>Confirm</Button>
-            <Button variant="outlined" onClick={() => setOpenDeleteModal(false)} sx={{ marginLeft: 2 }}>Cancel</Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Modal for Creating a New Course */}
-      <Modal open={openCreateModal} onClose={() => setOpenCreateModal(false)}>
-        <Box sx={{ padding: 4, backgroundColor: 'white', margin: 'auto', maxWidth: 400 }}>
-          <Typography variant="h6">Create Course</Typography>
-          <TextField
-            label="Instructor ID"
-            variant="outlined"
-            fullWidth
-            value={newCourse.instructorID}
-            onChange={(e) => setNewCourse({ ...newCourse, instructorID: e.target.value })}
-            sx={{ marginBottom: 2 }}
-            required
-          />
+          <Typography variant="h6">Edit Course</Typography>
           <TextField
             label="Title"
             variant="outlined"
             fullWidth
-            value={newCourse.title}
-            onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+            value={selectedCourse?.title || ''}
+            onChange={(e) => setSelectedCourse({ ...selectedCourse, title: e.target.value })}
             sx={{ marginBottom: 2 }}
             required
           />
@@ -260,8 +242,8 @@ export default function AdminCourses() {
             label="Description"
             variant="outlined"
             fullWidth
-            value={newCourse.description}
-            onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+            value={selectedCourse?.description || ''}
+            onChange={(e) => setSelectedCourse({ ...selectedCourse, description: e.target.value })}
             sx={{ marginBottom: 2 }}
             required
           />
@@ -270,8 +252,8 @@ export default function AdminCourses() {
             variant="outlined"
             type="number"
             fullWidth
-            value={newCourse.price}
-            onChange={(e) => setNewCourse({ ...newCourse, price: e.target.value })}
+            value={selectedCourse?.price || ''}
+            onChange={(e) => setSelectedCourse({ ...selectedCourse, price: parseFloat(e.target.value) })}
             sx={{ marginBottom: 2 }}
             required
           />
@@ -279,14 +261,14 @@ export default function AdminCourses() {
             label="Category"
             variant="outlined"
             fullWidth
-            value={newCourse.category}
-            onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
+            value={selectedCourse?.category || ''}
+            onChange={(e) => setSelectedCourse({ ...selectedCourse, category: e.target.value })}
             sx={{ marginBottom: 2 }}
             required
           />
           <Box sx={{ marginTop: 2 }}>
-            <Button variant="contained" color="primary" onClick={handleCreateCourse}>Create</Button>
-            <Button variant="outlined" onClick={() => setOpenCreateModal(false)} sx={{ marginLeft: 2 }}>Cancel</Button>
+            <Button variant="contained" color="primary" onClick={handleEditCourse}>Save</Button>
+            <Button variant="outlined" onClick={() => setOpenEditModal(false)} sx={{ marginLeft: 2 }}>Cancel</Button>
           </Box>
           {error && (
             <Typography sx={{ color: 'error.main', mt: 2 }} variant="body2">
@@ -295,6 +277,88 @@ export default function AdminCourses() {
           )}
         </Box>
       </Modal>
+
+      {/* Modal for Deleting Course */}
+      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+        <Box sx={{ padding: 4, backgroundColor: 'white', margin: 'auto', maxWidth: 400, textAlign: 'center' }}>
+          <Typography variant="h6">Confirm Delete</Typography>
+          <Typography sx={{ mt: 2 }}>
+            Are you sure you want to delete the course "{selectedCourse?.title}"?
+          </Typography>
+          <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
+            <Button variant="contained" color="error" onClick={handleDelete}>Delete</Button>
+            <Button variant="outlined" onClick={() => setOpenDeleteModal(false)}>Cancel</Button>
+          </Box>
+          {error && (
+            <Typography sx={{ color: 'error.main', mt: 2 }} variant="body2">
+              {error}
+            </Typography>
+          )}
+        </Box>
+      </Modal>
+
+      {/* Modal for Creating Course */}
+<Modal open={openCreateModal} onClose={() => setOpenCreateModal(false)}>
+  <Box sx={{ padding: 4, backgroundColor: 'white', margin: 'auto', maxWidth: 400 }}>
+    <Typography variant="h6">Create New Course</Typography>
+    <TextField
+      label="Instructor ID"
+      variant="outlined"
+      fullWidth
+      value={newCourse.instructorID}
+      onChange={(e) => setNewCourse({ ...newCourse, instructorID: e.target.value })}
+      sx={{ marginBottom: 2 }}
+      required
+    />
+    <TextField
+      label="Title"
+      variant="outlined"
+      fullWidth
+      value={newCourse.title}
+      onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+      sx={{ marginBottom: 2 }}
+      required
+    />
+    <TextField
+      label="Description"
+      variant="outlined"
+      fullWidth
+      value={newCourse.description}
+      onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+      sx={{ marginBottom: 2 }}
+      required
+    />
+    <TextField
+      label="Price"
+      variant="outlined"
+      type="number"
+      fullWidth
+      value={newCourse.price}
+      onChange={(e) => setNewCourse({ ...newCourse, price: parseFloat(e.target.value) })}
+      sx={{ marginBottom: 2 }}
+      required
+    />
+    <TextField
+      label="Category"
+      variant="outlined"
+      fullWidth
+      value={newCourse.category}
+      onChange={(e) => setNewCourse({ ...newCourse, category: e.target.value })}
+      sx={{ marginBottom: 2 }}
+      required
+    />
+    <Box sx={{ marginTop: 2 }}>
+      <Button variant="contained" color="primary" onClick={handleCreateCourse}>Create</Button>
+      <Button variant="outlined" onClick={() => setOpenCreateModal(false)} sx={{ marginLeft: 2 }}>Cancel</Button>
+    </Box>
+    {error && (
+      <Typography sx={{ color: 'error.main', mt: 2 }} variant="body2">
+        {error}
+      </Typography>
+    )}
+  </Box>
+</Modal>
+
     </Box>
   );
 }

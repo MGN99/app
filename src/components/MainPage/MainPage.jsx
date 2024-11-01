@@ -16,32 +16,40 @@ import {
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import axios from 'axios';
-import CourseCard from '../PanelUser/CourseCard'; // Asegúrate de que la ruta sea correcta
+import CourseCard from '../PanelUser/CourseCard';
 import useCartStore from '../MainPage/CartStore';
 
-const API_URL = 'http://localhost:8081/graphql'; // Cambia esto a la URL de tu API
+const API_URL = 'http://localhost:8081/graphql';
+const API_URL2 = 'http://localhost:8080/graphql';
 
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceOrder, setPriceOrder] = useState('');
   const [userEmail, setUserEmail] = useState(null);
+  const [username, setUsername] = useState(null); // Agregar estado para username
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { cartItems, addToCart } = useCartStore(); // Usar el store
+  const { cartItems, addToCart } = useCartStore();
 
   useEffect(() => {
     const email = localStorage.getItem('email');
+    const storedUsername = localStorage.getItem('username'); // Obtener el username del localStorage
     if (email) {
       setUserEmail(email);
     }
+    if (storedUsername) {
+      setUsername(storedUsername); // Establecer el username en el estado
+    }
     fetchCourses(); // Llama a la función para obtener cursos
+    console.log('Stored username from localStorage:', storedUsername);
+    console.log('Stored email from localStorage:', email);
   }, []);
 
   const fetchCourses = async () => {
-    setLoading(true); // Establecer loading en true al inicio
+    setLoading(true);
     try {
       const response = await axios.post(API_URL, {
         query: `
@@ -55,25 +63,29 @@ const MainPage = () => {
               category
             }
           }
-        `
+        `,
       });
       setCourses(response.data.data.cursos || []);
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
-      setLoading(false); // Cambiar loading a false al final
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('email');
     localStorage.removeItem('token');
+    localStorage.removeItem('username'); // Eliminar el username al cerrar sesión
     setUserEmail(null);
+    setUsername(null); // Limpiar el estado de username
   };
 
   const handleCourseClick = (course) => {
+    
     setSelectedCourse(course);
     setIsModalOpen(true);
+    console.log('Selected course:', course);
   };
 
   const closeModal = () => {
@@ -81,10 +93,44 @@ const MainPage = () => {
     setIsModalOpen(false);
   };
 
-  const handleAddToCart = () => {
-    addToCart(selectedCourse); // Usar la función de añadir al carrito
-    setIsModalOpen(false);
-  };
+  const handleAddToCart = async () => {
+    if (username) {
+        console.log("Iniciando proceso para añadir al carrito...");
+        try {
+            const response = await axios.post(`${API_URL2}`, {
+                query: `
+                    mutation AddToCart {
+                        addToCart(username: "${username}", courseID: "${selectedCourse.courseID}") {
+                            cartID
+                            userID
+                            courseID
+                        }
+                    }
+                `
+            });
+
+            // Lógica para añadir el curso al estado del carrito
+            const existingItem = cartItems.find(item => item.courseID === selectedCourse.courseID);
+  
+            if (existingItem) {
+                addToCart({
+                    ...existingItem,
+                    quantity: existingItem.quantity + 1,
+                });
+            } else {
+                addToCart({ ...selectedCourse, quantity: 1 });
+            }
+  
+            setIsModalOpen(false);
+            console.log("Curso añadido al carrito:", response.data);
+        } catch (error) {
+            console.error('Error al añadir el curso al carrito:', error);
+        }
+    }
+};
+
+  
+  
 
   const filteredCourses = courses
     .filter((course) => {
@@ -97,7 +143,6 @@ const MainPage = () => {
       return 0;
     });
 
-  // Estilos para el modal
   const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -144,22 +189,22 @@ const MainPage = () => {
             {userEmail ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>
-                  Welcome, {userEmail}
+                  Bienvenido, {userEmail}
                 </Typography>
                 <Badge
-                  badgeContent={cartItems.length} // Cambiar a length para mostrar la cantidad
-                  color="secondary"
-                  sx={{ 
-                    '& .MuiBadge-badge': { 
-                      top: 10, 
-                      right: -5 
-                    } 
-                  }}
-                >
-                  <Link to="/cart">
-                    <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
-                  </Link>
-                </Badge>
+                badgeContent={cartItems.length}
+                color="secondary"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    top: 10,
+                    right: -5,
+                  },
+                }}
+              >
+                <Link to="/cart">
+                  <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
+                </Link>
+              </Badge>
                 <Button
                   color="primary"
                   onClick={handleLogout}
@@ -248,9 +293,9 @@ const MainPage = () => {
               <Grid item xs={12} sm={6} md={4} lg={3} key={course.courseID}>
                 <CourseCard
                   title={course.title}
-                  instructor={course.instructorID} // Cambia esto si es necesario
-                  progress={50} // Cambia esto según tu lógica para mostrar el progreso
-                  onClick={() => handleCourseClick(course)} // Llama a la función al hacer clic
+                  instructor={course.instructorID}
+                  
+                  onClick={() => handleCourseClick(course)}
                 />
               </Grid>
             ))
@@ -259,29 +304,24 @@ const MainPage = () => {
       </Container>
 
       {/* Modal for course details */}
-      {selectedCourse && (
-        <Modal open={isModalOpen} onClose={closeModal}>
-          <Box sx={modalStyle}>
-            <Typography variant="h5" gutterBottom>
-              {selectedCourse.title}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {selectedCourse.description}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Precio: ${selectedCourse.price}
-            </Typography>
-            <Button variant="contained" color="primary" onClick={handleAddToCart}>
-              Agregar al Carrito
-            </Button>
-            <Button variant="outlined" onClick={closeModal}>
-              Cerrar
-            </Button>
-          </Box>
-        </Modal>
-      )}
-
-      <Outlet /> {/* Renderiza las rutas hijas aquí */}
+      <Modal open={isModalOpen} onClose={closeModal}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" component="h2">
+            {selectedCourse?.title}
+          </Typography>
+          <Typography sx={{ mt: 2 }}>{selectedCourse?.description}</Typography>
+          <Typography sx={{ mt: 2 }}>Precio: ${selectedCourse?.price}</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddToCart} // Aquí se debe asegurar que esté llamando a `handleAddToCart`
+            sx={{ mt: 2 }}
+          >
+            Añadir al carrito
+          </Button>
+        </Box>
+      </Modal>
+      <Outlet />
     </div>
   );
 };

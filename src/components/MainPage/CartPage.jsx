@@ -1,20 +1,20 @@
-// src/components/MainPage/CartPage.jsx
 import React, { useEffect, useState } from 'react';
-import { getCartByUsername, removeFromCart } from '../MainPage/CartService';
+import { viewCartByUsername, removeFromCart } from '../MainPage/CartService';
 import { Button, Typography, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
 
-  // Obtener el nombre de usuario del almacenamiento local o de un estado global
   const username = localStorage.getItem('username'); // Ajusta esto según tu lógica
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const data = await getCartByUsername(username);
+        const data = await viewCartByUsername(username);
+        
         setCartItems(data || []); // Ajusta esto según la estructura de tu respuesta
       } catch (err) {
         setError(err.message);
@@ -33,13 +33,15 @@ const CartPage = () => {
 
   const handleRemoveFromCart = async (courseID) => {
     try {
-      await removeFromCart(username, courseID);
-      // Actualiza el estado después de eliminar el curso
+      const message = await removeFromCart(courseID);
       setCartItems((prevItems) => prevItems.filter(item => item.courseID !== courseID));
+      
+      // Si deseas mostrar el mensaje de éxito, puedes agregarlo a un estado de mensaje aquí
     } catch (err) {
       setError(err.message);
     }
   };
+  
 
   if (loading) {
     return <Typography variant="h6">Cargando el carrito...</Typography>;
@@ -50,6 +52,7 @@ const CartPage = () => {
   }
 
   return (
+    
     <div>
       <Typography variant="h4" gutterBottom>
         Tu Carrito de Compras
@@ -61,8 +64,8 @@ const CartPage = () => {
           {cartItems.map(item => (
             <ListItem key={item.courseID}>
               <ListItemText
-                primary={item.title} // Cambia esto según cómo obtengas el título
-                secondary={`Cantidad: ${item.quantity} - Precio: $${item.price}`} // Ajusta la estructura según tu respuesta
+                primary={`Curso ID: ${item.courseID}`} // Cambia esto según cómo obtengas el título
+                
               />
               <ListItemSecondaryAction>
                 <Button variant="outlined" color="secondary" onClick={() => handleRemoveFromCart(item.courseID)}>

@@ -1,24 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'; // Import the exit icon
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'; 
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminCourses from './AdminCourses';
 import AdminUsers from './AdminUsers';
+import axios from 'axios';
 
-// Datos de ejemplo para el gráfico
-const data = [
-  { name: 'Jan', users: 120 },
-  { name: 'Feb', users: 200 },
-  { name: 'Mar', users: 150 },
-  { name: 'Apr', users: 300 },
-  { name: 'May', users: 280 },
-];
-
+const API_URL = 'http://localhost:8080/graphql';
+const API_URL2 = 'http://localhost:8081/graphql';
 const AdminDashboard = () => {
   const [selectedView, setSelectedView] = useState('dashboard');
+  const [users, setUsers] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [error, setError] = useState('');
+
+  // Función para obtener los cursos
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.post(API_URL2, {
+        query: `query {
+            cursos {
+              courseID
+              instructorID
+              title
+              description
+              price
+              category
+            }
+          }
+        `
+      });
+      setCourses(response.data.data.cursos || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setError('Error al obtener los cursos.');
+    } finally {
+      setLoadingCourses(false);
+    }
+  };
+
+  // Función para obtener los usuarios
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.post(API_URL, {
+        query: `query {
+            getAllUsers {
+              userID
+              nameLastName
+              username
+              email
+              role
+            }
+          }`,
+      });
+      setUsers(response.data.data.getAllUsers || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError('Error al obtener los usuarios.');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Efecto para cargar los datos al montar el componente
+  useEffect(() => {
+    fetchUsers();
+    fetchCourses();
+  }, []);
+
+  // Cálculo de totales
+  const totalUsers = users.length;
+  const totalCourses = courses.length;
+
+  // Datos de ejemplo para el gráfico
+  const data = [
+    { name: 'Jan', users: 120 },
+    { name: 'Feb', users: 200 },
+    { name: 'Mar', users: 150 },
+    { name: 'Apr', users: 300 },
+    { name: 'May', users: 280 },
+  ];
 
   const renderContent = () => {
     switch (selectedView) {
@@ -29,10 +95,10 @@ const AdminDashboard = () => {
               Admin Panel
             </Typography>
             <Typography variant="h6">Bienvenido al Panel de Administración</Typography>
+            
 
-            {/* Usando Grid para layout responsivo */}
             <Grid container spacing={3} sx={{ mt: 2 }}>
-              {/* Tarjeta 1 */}
+              {/* Tarjeta de Total de Usuarios */}
               <Grid item xs={12} md={4}>
                 <Card sx={{ minHeight: 150 }}>
                   <CardContent>
@@ -40,13 +106,13 @@ const AdminDashboard = () => {
                       Total de Usuarios
                     </Typography>
                     <Typography variant="h4" color="primary">
-                      200
+                      {loadingUsers ? 'Cargando...' : totalUsers}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
 
-              {/* Tarjeta 2 */}
+              {/* Tarjeta de Cursos Activos */}
               <Grid item xs={12} md={4}>
                 <Card sx={{ minHeight: 150 }}>
                   <CardContent>
@@ -54,25 +120,13 @@ const AdminDashboard = () => {
                       Cursos Activos
                     </Typography>
                     <Typography variant="h4" color="secondary">
-                      50
+                      {loadingCourses ? 'Cargando...' : totalCourses}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
 
-              {/* Tarjeta 3 */}
-              <Grid item xs={12} md={4}>
-                <Card sx={{ minHeight: 150 }}>
-                  <CardContent>
-                    <Typography variant="h5" component="div">
-                      Comentarios Pendientes
-                    </Typography>
-                    <Typography variant="h4" color="error">
-                      10
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
+              
             </Grid>
 
             {/* Sección de gráfico */}
@@ -108,7 +162,6 @@ const AdminDashboard = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      {/* Sidebar */}
       <Drawer
         variant="permanent"
         sx={{
@@ -144,7 +197,6 @@ const AdminDashboard = () => {
           </ListItem>
         </List>
 
-        {/* Logout button */}
         <Box sx={{ marginTop: 'auto', padding: 2 }}>
           <Button
             variant="contained"
@@ -158,7 +210,6 @@ const AdminDashboard = () => {
         </Box>
       </Drawer>
 
-      {/* Contenido dinámico */}
       <Box component="main" sx={{ flexGrow: 1, padding: 3 }}>
         {renderContent()}
       </Box>

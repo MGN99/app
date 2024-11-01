@@ -1,11 +1,14 @@
-import { create } from 'zustand'; // Cambia esto a una importación nombrada
+import {create} from 'zustand';
 
-const useCartStore = create((set) => ({
+const useCartStore = create((set, get) => ({
   cartItems: [],
-  addToCart: (course) => set((state) => ({ cartItems: [...state.cartItems, course] })),
-  removeFromCart: (courseId) => set((state) => ({
-    cartItems: state.cartItems.filter(item => item.courseID !== courseId),
+  addToCart: (item) => set((state) => ({
+    cartItems: [...state.cartItems, item],
   })),
+  removeFromCart: (itemID) => set((state) => ({
+    cartItems: state.cartItems.filter((item) => item.courseID !== itemID),
+  })),
+  getCartCount: () => get().cartItems.length, 
 }));
 
-export default useCartStore; // Continúa exportando como default
+export default useCartStore;

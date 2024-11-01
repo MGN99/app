@@ -1,44 +1,56 @@
 // src/services/cartService.js
 import axios from 'axios';
 
-// Configurar la URL base de tu API
-const API_URL = 'http://localhost:8080/api'; // Cambia esto si es necesario
 
-// Obtener el carrito por el nombre de usuario
-export const getCartByUsername = async (username) => {
+
+const API_URL = 'http://localhost:8080/graphql'; // Cambia esto si es necesario
+
+
+
+// Obtener el carrito por nombre de usuario
+export const viewCartByUsername = async (username) => {
   try {
-    const response = await axios.post(`${API_URL}/cart/view`, { username });
-    return response.data;
+    const response = await axios.post(API_URL, {
+      query: `
+        mutation {
+          viewCartByUsername(username: "${username}") {
+            cartID
+            userID
+            courseID
+          }
+        }
+      `,
+    });
+    return response.data.data.viewCartByUsername; // Ajusta según la estructura de tu respuesta
   } catch (error) {
     throw new Error(`Error al obtener el carrito: ${error.response ? error.response.data : error.message}`);
   }
 };
 
-// Agregar un curso al carrito
-export const addToCart = async (username, courseID, quantity) => {
+
+// Obtener el carrito por ID de usuario
+export const viewCartByUserID = async (userID) => {
   try {
-    const response = await axios.post(`${API_URL}/cart/add`, {
-      username,
-      courseID,
-      quantity,
-    });
+    const response = await axios.post(`${API_URL}/cart/viewByID`, { userID });
     return response.data;
   } catch (error) {
-    throw new Error(`Error al agregar el curso al carrito: ${error.response ? error.response.data : error.message}`);
+    throw new Error(`Error al obtener el carrito por ID de usuario: ${error.response ? error.response.data : error.message}`);
   }
 };
-
-
 
 // Eliminar un curso del carrito
-export const removeFromCart = async (username, courseID) => {
+export const removeFromCart = async (courseID) => {
   try {
-    const response = await axios.post(`${API_URL}/cart/remove`, {
-      username,
-      courseID,
+    const response = await axios.post(API_URL, {
+      query: `
+        mutation {
+          deleteCartByCourseID(courseID: "${courseID}")
+        }
+      `,
     });
-    return response.data;
+    return response.data.data.deleteCartByCourseID; // Maneja la respuesta según sea necesario
   } catch (error) {
-    throw new Error(`Error al eliminar el curso del carrito: ${error.response ? error.response.data : error.message}`);
+    throw new Error(`Error al eliminar el curso del carrito: ${error.response ? error.response.data.errors[0].message : error.message}`);
   }
 };
+

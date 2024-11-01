@@ -66,7 +66,7 @@ const Login = () => {
       if (message === 'Inicio de sesión exitoso') {
         localStorage.setItem('authenticated', 'true');
         localStorage.setItem('email', email);
-        localStorage.setItem('username', email);  // Guarda el username
+        localStorage.setItem('username', username);  // Guarda el username
         navigate('/');
       } else {
         setError('Login failed');

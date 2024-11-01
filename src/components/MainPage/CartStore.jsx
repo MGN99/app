@@ -6,18 +6,18 @@ const API_URL = 'http://localhost:8080/graphql';
 const useCartStore = create((set, get) => ({
   cartItems: [],
   
-  fetchCartItems: async (username) => {
+  fetchCartItems: async (email) => {
     try {
       const response = await axios.post(API_URL, {
         query: `
           mutation {
-            viewCartByUsername(username: "${username}") {
+            viewCartByEmail(email: "${email}") {
               courseID
             }
           }
         `,
       });
-      set({ cartItems: response.data.data.viewCartByUsername || [] });
+      set({ cartItems: response.data.data.viewCartByEmail || [] });
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }

@@ -8,12 +8,12 @@ const API_URL = 'http://localhost:8080/graphql'; // Cambia esto si es necesario
 
 
 // Obtener el carrito por nombre de usuario
-export const viewCartByUsername = async (username) => {
+export const viewCartByEmail = async (email) => {
   try {
     const response = await axios.post(API_URL, {
       query: `
         mutation {
-          viewCartByUsername(username: "${username}") {
+          viewCartByEmail(email: "${email}") {
             cartID
             userID
             courseID
@@ -21,7 +21,7 @@ export const viewCartByUsername = async (username) => {
         }
       `,
     });
-    return response.data.data.viewCartByUsername; // Ajusta según la estructura de tu respuesta
+    return response.data.data.viewCartByEmail; // Ajusta según la estructura de tu respuesta
   } catch (error) {
     throw new Error(`Error al obtener el carrito: ${error.response ? error.response.data : error.message}`);
   }

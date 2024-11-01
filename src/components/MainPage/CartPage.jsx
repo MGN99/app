@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { viewCartByUsername, removeFromCart } from '../MainPage/CartService';
+import { viewCartByEmail, removeFromCart } from '../MainPage/CartService';
 import { Button, Typography, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
 import useCartStore from './CartStore'; // Ajusta la ruta según tu estructura
 
 const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = localStorage.getItem('username'); // Usamos el username actual
+  const email = localStorage.getItem('email'); // Usamos el email actual
   const { cartItems, addToCart, removeFromCart: removeItemFromStore } = useCartStore();
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      if (!username) return; // Si no hay usuario, no cargar nada
+      if (!email) return; // Si no hay usuario, no cargar nada
 
       setLoading(true); // Activar el loading al cargar nuevos datos
 
       try {
-        const data = await viewCartByUsername(username);
+        const data = await viewCartByEmail(email);
         if (data) {
           // Actualizar el carrito en Zustand con los datos recibidos del backend
           useCartStore.setState({ cartItems: data });
@@ -28,8 +28,8 @@ const CartPage = () => {
       }
     };
 
-    fetchCartItems(); // Llamar cada vez que `username` cambie
-  }, [username]);
+    fetchCartItems(); // Llamar cada vez que `email` cambie
+  }, [email]);
 
   const handleRemoveFromCart = async (courseID) => {
     try {

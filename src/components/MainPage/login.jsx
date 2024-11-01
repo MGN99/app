@@ -12,6 +12,7 @@ import {
   Paper,
 } from '@mui/material';
 import { styled } from '@mui/system';
+import useCartStore from '../MainPage/CartStore';
 
 const StyledButton = styled(Button)({
   background: 'linear-gradient(45deg, #1F3B60 30%, #122841 90%)',

@@ -26,22 +26,23 @@ const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceOrder, setPriceOrder] = useState('');
   const [userEmail, setUserEmail] = useState(null);
-  const [username, setUsername] = useState(null); // Agregar estado para username
+  const [username, setUsername] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { cartItems, addToCart } = useCartStore();
+  const { cartItems, addToCart, fetchCartItems, clearCart } = useCartStore();
 
   useEffect(() => {
     const email = localStorage.getItem('email');
-    const storedUsername = localStorage.getItem('username'); // Obtener el username del localStorage
+    const storedUsername = localStorage.getItem('username');
     if (email) {
       setUserEmail(email);
     }
     if (storedUsername) {
-      setUsername(storedUsername); // Establecer el username en el estado
+      setUsername(storedUsername);
+      fetchCartItems(storedUsername); // Cargar el carrito desde el backend al iniciar sesión
     }
     fetchCourses(); // Llama a la función para obtener cursos
     console.log('Stored username from localStorage:', storedUsername);
@@ -76,13 +77,13 @@ const MainPage = () => {
   const handleLogout = () => {
     localStorage.removeItem('email');
     localStorage.removeItem('token');
-    localStorage.removeItem('username'); // Eliminar el username al cerrar sesión
+    localStorage.removeItem('username');
+    clearCart(); // Limpiar el carrito al cerrar sesión
     setUserEmail(null);
-    setUsername(null); // Limpiar el estado de username
+    setUsername(null);
   };
 
   const handleCourseClick = (course) => {
-    
     setSelectedCourse(course);
     setIsModalOpen(true);
     console.log('Selected course:', course);
@@ -95,42 +96,39 @@ const MainPage = () => {
 
   const handleAddToCart = async () => {
     if (username) {
-        console.log("Iniciando proceso para añadir al carrito...");
-        try {
-            const response = await axios.post(`${API_URL2}`, {
-                query: `
-                    mutation AddToCart {
-                        addToCart(username: "${username}", courseID: "${selectedCourse.courseID}") {
-                            cartID
-                            userID
-                            courseID
-                        }
-                    }
-                `
-            });
-
-            // Lógica para añadir el curso al estado del carrito
-            const existingItem = cartItems.find(item => item.courseID === selectedCourse.courseID);
-  
-            if (existingItem) {
-                addToCart({
-                    ...existingItem,
-                    quantity: existingItem.quantity + 1,
-                });
-            } else {
-                addToCart({ ...selectedCourse, quantity: 1 });
+      console.log("Iniciando proceso para añadir al carrito...");
+      try {
+        const response = await axios.post(API_URL2, {
+          query: `
+            mutation AddToCart {
+              addToCart(username: "${username}", courseID: "${selectedCourse.courseID}") {
+                cartID
+                userID
+                courseID
+              }
             }
-  
-            setIsModalOpen(false);
-            console.log("Curso añadido al carrito:", response.data);
-        } catch (error) {
-            console.error('Error al añadir el curso al carrito:', error);
-        }
-    }
-};
+          `
+        });
 
-  
-  
+        // Lógica para añadir el curso al estado del carrito
+        const existingItem = cartItems.find(item => item.courseID === selectedCourse.courseID);
+
+        if (existingItem) {
+          addToCart({
+            ...existingItem,
+            quantity: existingItem.quantity + 1,
+          });
+        } else {
+          addToCart({ ...selectedCourse, quantity: 1 });
+        }
+
+        setIsModalOpen(false);
+        console.log("Curso añadido al carrito:", response.data);
+      } catch (error) {
+        console.error('Error al añadir el curso al carrito:', error);
+      }
+    }
+  };
 
   const filteredCourses = courses
     .filter((course) => {
@@ -192,19 +190,19 @@ const MainPage = () => {
                   Bienvenido, {userEmail}
                 </Typography>
                 <Badge
-                badgeContent={cartItems.length}
-                color="secondary"
-                sx={{
-                  '& .MuiBadge-badge': {
-                    top: 10,
-                    right: -5,
-                  },
-                }}
-              >
-                <Link to="/cart">
-                  <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
-                </Link>
-              </Badge>
+                  badgeContent={cartItems.length}
+                  color="secondary"
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      top: 10,
+                      right: -5,
+                    },
+                  }}
+                >
+                  <Link to="/cart">
+                    <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
+                  </Link>
+                </Badge>
                 <Button
                   color="primary"
                   onClick={handleLogout}
@@ -294,7 +292,6 @@ const MainPage = () => {
                 <CourseCard
                   title={course.title}
                   instructor={course.instructorID}
-                  
                   onClick={() => handleCourseClick(course)}
                 />
               </Grid>
@@ -314,7 +311,7 @@ const MainPage = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleAddToCart} // Aquí se debe asegurar que esté llamando a `handleAddToCart`
+            onClick={handleAddToCart}
             sx={{ mt: 2 }}
           >
             Añadir al carrito

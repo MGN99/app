@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { viewCartByUsername, removeFromCart } from '../MainPage/CartService';
 import { Button, Typography, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
+import useCartStore from './CartStore'; // Ajusta la ruta según tu estructura
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-
-  const username = localStorage.getItem('username'); // Ajusta esto según tu lógica
+  const username = localStorage.getItem('username'); // Usamos el username actual
+  const { cartItems, addToCart, removeFromCart: removeItemFromStore } = useCartStore();
 
   useEffect(() => {
     const fetchCartItems = async () => {
+      if (!username) return; // Si no hay usuario, no cargar nada
+
+      setLoading(true); // Activar el loading al cargar nuevos datos
+
       try {
         const data = await viewCartByUsername(username);
-        
-        setCartItems(data || []); // Ajusta esto según la estructura de tu respuesta
+        if (data) {
+          // Actualizar el carrito en Zustand con los datos recibidos del backend
+          useCartStore.setState({ cartItems: data });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -23,26 +28,18 @@ const CartPage = () => {
       }
     };
 
-    if (username) {
-      fetchCartItems();
-    } else {
-      setError('No se encontró el nombre de usuario.');
-      setLoading(false);
-    }
+    fetchCartItems(); // Llamar cada vez que `username` cambie
   }, [username]);
 
   const handleRemoveFromCart = async (courseID) => {
     try {
-      const message = await removeFromCart(courseID);
-      setCartItems((prevItems) => prevItems.filter(item => item.courseID !== courseID));
-      
-      // Si deseas mostrar el mensaje de éxito, puedes agregarlo a un estado de mensaje aquí
+      await removeFromCart(courseID);
+      removeItemFromStore(courseID); // Remover del estado de Zustand usando la función original
     } catch (err) {
       setError(err.message);
     }
   };
   
-
   if (loading) {
     return <Typography variant="h6">Cargando el carrito...</Typography>;
   }
@@ -52,7 +49,6 @@ const CartPage = () => {
   }
 
   return (
-    
     <div>
       <Typography variant="h4" gutterBottom>
         Tu Carrito de Compras
@@ -65,7 +61,6 @@ const CartPage = () => {
             <ListItem key={item.courseID}>
               <ListItemText
                 primary={`Curso ID: ${item.courseID}`} // Cambia esto según cómo obtengas el título
-                
               />
               <ListItemSecondaryAction>
                 <Button variant="outlined" color="secondary" onClick={() => handleRemoveFromCart(item.courseID)}>

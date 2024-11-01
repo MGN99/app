@@ -7,7 +7,7 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const email = localStorage.getItem('email'); // Usamos el email actual
-  const { cartItems, addToCart, removeFromCart: removeItemFromStore } = useCartStore();
+  const { cartItems, addToCartbyEmail, removeFromCart: removeItemFromStore } = useCartStore();
 
   useEffect(() => {
     const fetchCartItems = async () => {

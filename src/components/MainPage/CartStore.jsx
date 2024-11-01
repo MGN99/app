@@ -23,7 +23,7 @@ const useCartStore = create((set, get) => ({
     }
   },
 
-  addToCart: (item) => set((state) => ({
+  addToCartbyEmail: (item) => set((state) => ({
     cartItems: [...state.cartItems, item],
   })),
 

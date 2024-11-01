@@ -25,24 +25,25 @@ const API_URL2 = 'http://localhost:8080/graphql';
 const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceOrder, setPriceOrder] = useState('');
-  const [userEmail, setUserEmail] = useState(null);
+  const [email, setUserEmail] = useState(null);
   const [username, setUsername] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { cartItems, addToCart, fetchCartItems, clearCart } = useCartStore();
+  const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
 
   useEffect(() => {
     const email = localStorage.getItem('email');
     const storedUsername = localStorage.getItem('username');
     if (email) {
       setUserEmail(email);
+      fetchCartItems(email); // Cargar el carrito desde el backend al iniciar sesión
     }
     if (storedUsername) {
       setUsername(storedUsername);
-      fetchCartItems(storedUsername); // Cargar el carrito desde el backend al iniciar sesión
+      
     }
     fetchCourses(); // Llama a la función para obtener cursos
     console.log('Stored username from localStorage:', storedUsername);
@@ -94,14 +95,14 @@ const MainPage = () => {
     setIsModalOpen(false);
   };
 
-  const handleAddToCart = async () => {
-    if (username) {
+  const handleaddToCartbyEmail = async () => {
+    if (email) {
       console.log("Iniciando proceso para añadir al carrito...");
       try {
         const response = await axios.post(API_URL2, {
           query: `
-            mutation AddToCart {
-              addToCart(username: "${username}", courseID: "${selectedCourse.courseID}") {
+            mutation addToCartbyEmail {
+              addToCartbyEmail(email: "${email}", courseID: "${selectedCourse.courseID}") {
                 cartID
                 userID
                 courseID
@@ -114,12 +115,12 @@ const MainPage = () => {
         const existingItem = cartItems.find(item => item.courseID === selectedCourse.courseID);
 
         if (existingItem) {
-          addToCart({
+          addToCartbyEmail({
             ...existingItem,
             quantity: existingItem.quantity + 1,
           });
         } else {
-          addToCart({ ...selectedCourse, quantity: 1 });
+          addToCartbyEmail({ ...selectedCourse, quantity: 1 });
         }
 
         setIsModalOpen(false);
@@ -184,10 +185,10 @@ const MainPage = () => {
                 border: '1px solid #e0e0e0',
               }}
             />
-            {userEmail ? (
+            {email ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>
-                  Bienvenido, {userEmail}
+                  Bienvenido, {email}
                 </Typography>
                 <Badge
                   badgeContent={cartItems.length}
@@ -311,7 +312,7 @@ const MainPage = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleAddToCart}
+            onClick={handleaddToCartbyEmail}
             sx={{ mt: 2 }}
           >
             Añadir al carrito

@@ -58,7 +58,6 @@ const MainPage = () => {
           query {
             cursos {
               courseID
-              instructorID
               instructorName
               title
               description

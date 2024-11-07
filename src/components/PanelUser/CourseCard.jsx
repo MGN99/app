@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardActions, Typography, Button } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, Button, CardMedia } from '@mui/material';
 
-const CourseCard = ({ title, instructor, progress, onClick }) => {
+const CourseCard = ({ title, instructor, progress, imageURL, onClick }) => {
   return (
     <Card
       onClick={onClick}
@@ -14,9 +14,18 @@ const CourseCard = ({ title, instructor, progress, onClick }) => {
         cursor: 'pointer',
         borderRadius: '8px',
         backgroundColor: '#f9f9f9',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
       }}
     >
-      <CardContent>
+      <CardMedia
+        component="img"
+        height="140"
+        image={imageURL || '/placeholder.svg?height=140&width=250'}
+        alt={title}
+      />
+      <CardContent sx={{ flexGrow: 1 }}>
         <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#333' }}>
           {title}
         </Typography>

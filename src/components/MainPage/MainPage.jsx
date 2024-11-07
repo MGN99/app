@@ -59,10 +59,12 @@ const MainPage = () => {
             cursos {
               courseID
               instructorID
+              instructorName
               title
               description
               price
               category
+              imageURL
             }
           }
         `,
@@ -292,7 +294,8 @@ const MainPage = () => {
               <Grid item xs={12} sm={6} md={4} lg={3} key={course.courseID}>
                 <CourseCard
                   title={course.title}
-                  instructor={course.instructorID}
+                  instructor={course.instructorName}
+                  imageURL={course.imageURL}
                   onClick={() => handleCourseClick(course)}
                 />
               </Grid>

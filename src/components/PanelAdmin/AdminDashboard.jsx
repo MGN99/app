@@ -23,17 +23,19 @@ const AdminDashboard = () => {
   const fetchCourses = async () => {
     try {
       const response = await axios.post(API_URL2, {
-        query: `query {
+        query: `
+          query {
             cursos {
               courseID
-              instructorID
+              instructorName
               title
               description
               price
               category
+              imageURL
             }
           }
-        `
+        `,
       });
       setCourses(response.data.data.cursos || []);
     } catch (error) {

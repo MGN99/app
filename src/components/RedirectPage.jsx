@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const RedirectPage = () => {
+const RedirectPage = ({ isRejected }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -12,14 +12,14 @@ const RedirectPage = () => {
     const courses = queryParams.get('courses');
     const amount = queryParams.get('amount');
 
-    // Construye la URL final para la página de confirmación
-    const confirmationUrl = `/ConfirmationPage?user=${encodeURIComponent(
-      user
-    )}&courses=${encodeURIComponent(courses)}&amount=${encodeURIComponent(amount)}`;
+    // Construye la URL final dependiendo del estado del pago
+    const targetUrl = isRejected
+      ? `/RejectedPage?user=${encodeURIComponent(user)}&courses=${encodeURIComponent(courses)}&amount=${encodeURIComponent(amount)}`
+      : `/ConfirmationPage?user=${encodeURIComponent(user)}&courses=${encodeURIComponent(courses)}&amount=${encodeURIComponent(amount)}`;
 
-    // Redirige a la página de confirmación
-    navigate(confirmationUrl);
-  }, [location, navigate]);
+    // Redirige a la página correspondiente
+    navigate(targetUrl);
+  }, [location, navigate, isRejected]);
 
   return <p>Redirigiendo...</p>;
 };

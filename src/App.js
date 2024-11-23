@@ -8,6 +8,8 @@ import AdminDashboard from './components/PanelAdmin/AdminDashboard';
 import ConfirmationPage from './components/ConfirmationPage';
 import CartPage from './components/MainPage/CartPage';
 import RedirectPage from './components/RedirectPage';
+import './components/RejectedPage';
+import RejectedPage from './components/RejectedPage';
 
 const App = () => {
   return (
@@ -21,6 +23,7 @@ const App = () => {
         <Route path="/adminDashboard" element={<AdminDashboard />} />
         <Route path="/redirect" element={<RedirectPage />} />
         <Route path="/ConfirmationPage" element={<ConfirmationPage />} />
+        <Route path="/RejectedPage" element={<RejectedPage />} />
       </Routes>
     </Router>
   );

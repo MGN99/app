@@ -15,6 +15,7 @@ import {
   Badge,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import axios from 'axios';
 import CourseCard from '../PanelUser/CourseCard';
 import useCartStore from '../MainPage/CartStore';
@@ -205,15 +206,31 @@ const MainPage = () => {
                     <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
                   </Link>
                 </Badge>
-                <Button
-                  color="primary"
-                  onClick={handleLogout}
-                  sx={{
-                    backgroundColor: '#e0e0e0',
-                    color: '#333',
-                    '&:hover': { backgroundColor: '#d4d4d4' },
-                  }}
-                >
+                {/* Botón de acceso al Panel */}
+        <Button
+          color="primary"
+          component={Link}
+          to="/dashboard"
+          sx={{
+            minWidth: 'auto',
+            backgroundColor: '#e0e0e0',
+            color: '#333',
+            padding: '6px',
+            borderRadius: '50%',
+            '&:hover': { backgroundColor: '#d4d4d4' },
+          }}
+        >
+          <AccountCircleIcon />
+        </Button>
+        <Button
+          color="primary"
+          onClick={handleLogout}
+          sx={{
+            backgroundColor: '#e0e0e0',
+            color: '#333',
+            '&:hover': { backgroundColor: '#d4d4d4' },
+          }}
+        >
                   Logout
                 </Button>
               </div>

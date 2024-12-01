@@ -1,78 +1,222 @@
-import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import './UserDashboard.css';
-import CourseCard from './CourseCard';
+import React, { useState, useEffect } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Pagination,
+  Box,
+  CssBaseline,
+  Divider,
+  Container,
+} from '@mui/material';
+import { Home, Person, Settings, ArrowBack } from '@mui/icons-material'; // Importar íconos
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import UserProfile from './UserProfile';
 import UserSettings from './UserSettings';
 
+// Configuración de URL de la API
+const API_URL = 'http://localhost:8080/graphql';
+
+// Ancho de la barra lateral
+const drawerWidth = 300;
+
 const UserDashboard = () => {
-  const [currentSection, setCurrentSection] = useState('courses'); // Sección predeterminada
-  const [currentPage, setCurrentPage] = useState(1); // Página actual
-  const coursesPerPage = 6; // Número de cursos por página
+  const [currentSection, setCurrentSection] = useState('courses');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // Lista de cursos
-  const courses = [
-    { title: 'Introduction to React', instructor: 'Jane Smith', progress: 60 },
-    { title: 'Advanced JavaScript', instructor: 'John Doe', progress: 40 },
-    { title: 'Python for Beginners', instructor: 'Alice Johnson', progress: 80 },
-    { title: 'Data Science', instructor: 'Bob Lee', progress: 90 },
-    { title: 'Machine Learning', instructor: 'Tom Harris', progress: 30 },
-    { title: 'HTML & CSS Basics', instructor: 'Eve Clark', progress: 100 },
-    { title: 'Web Development', instructor: 'Chris Evans', progress: 50 },
-    { title: 'Database Management', instructor: 'Emma Watson', progress: 70 },
-  ];
+  const coursesPerPage = 4;
 
-  // Calcular el número total de páginas
+  useEffect(() => {
+    const email = localStorage.getItem('email');
+    if (email) {
+      fetchCourses(email);
+    }
+  }, []);
+
+  const fetchCourses = async (email) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(API_URL, {
+        query: `
+          query {
+            getCoursesByEmail(email: "${email}") {
+              id
+              email
+              courseID
+            }
+          }
+        `,
+      });
+
+      const fetchedCourses = response.data.data.getCoursesByEmail || [];
+      setCourses(fetchedCourses);
+    } catch (error) {
+      console.error('Error al obtener los cursos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const totalPages = Math.ceil(courses.length / coursesPerPage);
-
-  // Obtener los cursos que se muestran en la página actual
   const indexOfLastCourse = currentPage * coursesPerPage;
   const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
   const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
 
-  // Funciones para cambiar de página
-  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const renderCourses = () => (
+    <>
+      <Typography variant="h5" fontWeight="bold" gutterBottom>
+        My Courses
+      </Typography>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Grid container spacing={3}>
+            {currentCourses.map((course) => (
+              <Grid item xs={12} sm={6} md={4} key={course.courseID}>
+                <Card elevation={3}>
+                  <CardContent>
+                    <Typography variant="h6" color="primary">
+                      Course ID: {course.courseID}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Email: {course.email}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ID Asociado: {course.id}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+          <Box mt={4} display="flex" justifyContent="center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, value) => setCurrentPage(value)}
+              color="primary"
+            />
+          </Box>
+        </>
+      )}
+    </>
+  );
 
   const renderSectionContent = () => {
     switch (currentSection) {
       case 'courses':
-        return (
-          <div className="courses-list">
-            <h1>Welcome to My Courses</h1>
-            <div className="course-cards">
-              {currentCourses.map((course, index) => (
-                <CourseCard
-                  key={index}
-                  title={course.title}
-                  instructor={course.instructor}
-                  progress={course.progress}
-                />
-              ))}
-            </div>
-            <div className="pagination">
-              <button onClick={prevPage} disabled={currentPage === 1}>Anterior</button>
-              <span>Página {currentPage} de {totalPages}</span>
-              <button onClick={nextPage} disabled={currentPage === totalPages}>Siguiente</button>
-            </div>
-          </div>
-        );
+        return renderCourses();
       case 'profile':
-        return <UserProfile />;  // Usar el componente de Profile
+        return <UserProfile />;
       case 'settings':
-        return <UserSettings />;  // Usar el componente de Settings
+        return <UserSettings />;
       default:
-        return <h1>My Courses</h1>;
+        return <Typography variant="h5">My Courses</Typography>;
     }
   };
 
+  const sections = [
+    { id: 'courses', label: 'Courses', icon: <Home /> },
+    { id: 'profile', label: 'Profile', icon: <Person /> },
+    { id: 'settings', label: 'Settings', icon: <Settings /> },
+  ];
+
   return (
-    <div className="user-dashboard">
-      <Sidebar onSectionChange={setCurrentSection} />
-      <div className="content">
-        {renderSectionContent()}
-      </div>
-    </div>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+
+      {/* Barra superior */}
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" noWrap>
+            User Dashboard
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Barra lateral */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            backgroundColor: '#162447',
+            color: '#ffffff',
+          },
+        }}
+      >
+        <Toolbar />
+        <Divider />
+        <List>
+          {sections.map((section) => (
+            <ListItem
+              button
+              key={section.id}
+              onClick={() => setCurrentSection(section.id)}
+              selected={currentSection === section.id}
+              sx={{
+                '&.Mui-selected': { backgroundColor: '#1f4068' },
+                '&:hover': { backgroundColor: '#1f4068' },
+              }}
+            >
+              <ListItemIcon sx={{ color: '#ffffff' }}>{section.icon}</ListItemIcon>
+              <ListItemText primary={section.label} />
+            </ListItem>
+          ))}
+        </List>
+        <Box sx={{ flexGrow: 1 }} /> {/* Espacio para empujar el botón de volver al final */}
+        <Divider />
+        <List>
+          <ListItem
+            button
+            onClick={() => navigate('/')}
+            sx={{
+              backgroundColor: '#e63946',
+              color: '#ffffff',
+              '&:hover': { backgroundColor: '#d62828' },
+            }}
+          >
+            <ListItemIcon sx={{ color: '#ffffff' }}>
+              <ArrowBack />
+            </ListItemIcon>
+            <ListItemText primary="Return to MainPage" />
+          </ListItem>
+        </List>
+      </Drawer>
+
+      {/* Contenido principal */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          backgroundColor: '#f5f5f5',
+          minHeight: '100vh',
+        }}
+      >
+        <Toolbar />
+        <Container>{renderSectionContent()}</Container>
+      </Box>
+    </Box>
   );
 };
 

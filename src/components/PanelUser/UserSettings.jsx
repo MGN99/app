@@ -1,138 +1,120 @@
 import React, { useState } from 'react';
 import {
   Paper, Typography, Button, List, ListItem, ListItemText, Divider, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, TextField, Switch, FormControlLabel
+  DialogContentText, DialogTitle, TextField, CircularProgress
 } from '@mui/material';
+import axios from 'axios';
 
 const UserSettings = () => {
-  // States for managing dialogs
   const [openSecurityDialog, setOpenSecurityDialog] = useState(false);
-  const [openNotificationsDialog, setOpenNotificationsDialog] = useState(false);
-  const [openPrivacyDialog, setOpenPrivacyDialog] = useState(false);
-  
-  // Toggle dialogs
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Abrir y cerrar el cuadro de diálogo para cambiar la contraseña
   const handleOpenSecurityDialog = () => setOpenSecurityDialog(true);
-  const handleCloseSecurityDialog = () => setOpenSecurityDialog(false);
+  const handleCloseSecurityDialog = () => {
+    setOpenSecurityDialog(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setError('');
+    setSuccessMessage('');
+  };
 
-  const handleOpenNotificationsDialog = () => setOpenNotificationsDialog(true);
-  const handleCloseNotificationsDialog = () => setOpenNotificationsDialog(false);
+  // Función para manejar el cambio de contraseña
+  const handleChangePassword = async () => {
+    const email = localStorage.getItem('email'); // Obtener el correo del usuario del localStorage
+    if (!email) {
+      setError('No se encontró el correo en el almacenamiento local.');
+      return;
+    }
 
-  const handleOpenPrivacyDialog = () => setOpenPrivacyDialog(true);
-  const handleClosePrivacyDialog = () => setOpenPrivacyDialog(false);
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await axios.post('http://localhost:8080/graphql', {
+        query: `
+          mutation {
+            actualizarContrasena(email: "${email}", oldPassword: "${currentPassword}", newPassword: "${newPassword}")
+          }
+        `,
+      });
+
+      // Si hay errores, se muestran
+      if (response.data.errors) {
+        setError('Error al actualizar la contraseña. Verifica que la contraseña actual sea correcta.');
+      } else {
+        setSuccessMessage('¡Contraseña actualizada con éxito!');
+      }
+    } catch (error) {
+      setError('Ocurrió un error al actualizar la contraseña.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, maxWidth: 600, margin: '0 auto' }}>
       <Typography variant="h4" gutterBottom>
-        Settings
+        Configuración
       </Typography>
-      
+
       <List>
-        {/* Account Security */}
+        {/* Seguridad de la cuenta */}
         <ListItem>
           <ListItemText
-            primary="Account Security"
-            secondary="Change your password and update security settings."
+            primary="Seguridad de la cuenta"
+            secondary="Cambia tu contraseña."
           />
           <Button variant="contained" color="primary" onClick={handleOpenSecurityDialog}>
-            Edit Security
+            Editar Seguridad
           </Button>
         </ListItem>
         <Divider variant="middle" />
-
-        {/* Notification Preferences */}
-        <ListItem>
-          <ListItemText
-            primary="Notification Preferences"
-            secondary="Manage your email and push notification settings."
-          />
-          <Button variant="contained" color="primary" onClick={handleOpenNotificationsDialog}>
-            Edit Notifications
-          </Button>
-        </ListItem>
-        <Divider variant="middle" />
-
-        {/* Privacy Settings */}
-        <ListItem>
-          <ListItemText
-            primary="Privacy Settings"
-            secondary="Adjust your privacy and data sharing preferences."
-          />
-          <Button variant="contained" color="primary" onClick={handleOpenPrivacyDialog}>
-            Edit Privacy
-          </Button>
-        </ListItem>
       </List>
 
-      {/* Dialog for Account Security */}
+      {/* Cuadro de diálogo para la seguridad de la cuenta */}
       <Dialog open={openSecurityDialog} onClose={handleCloseSecurityDialog}>
-        <DialogTitle>Change Password</DialogTitle>
+        <DialogTitle>Cambiar Contraseña</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter your current password and a new password to update your account security.
+            Ingresa tu contraseña actual y la nueva para actualizar la seguridad de tu cuenta.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Current Password"
+            label="Contraseña Actual"
             type="password"
             fullWidth
             variant="outlined"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
           />
           <TextField
             margin="dense"
-            label="New Password"
+            label="Nueva Contraseña"
             type="password"
             fullWidth
             variant="outlined"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
           />
+          {error && <Typography color="error">{error}</Typography>}
+          {successMessage && <Typography color="primary">{successMessage}</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseSecurityDialog} color="secondary">Cancel</Button>
-          <Button onClick={handleCloseSecurityDialog} color="primary">Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog for Notification Preferences */}
-      <Dialog open={openNotificationsDialog} onClose={handleCloseNotificationsDialog}>
-        <DialogTitle>Notification Preferences</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Manage how you receive notifications from the app.
-          </DialogContentText>
-          <FormControlLabel
-            control={<Switch defaultChecked />}
-            label="Email Notifications"
-          />
-          <FormControlLabel
-            control={<Switch />}
-            label="Push Notifications"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseNotificationsDialog} color="secondary">Cancel</Button>
-          <Button onClick={handleCloseNotificationsDialog} color="primary">Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog for Privacy Settings */}
-      <Dialog open={openPrivacyDialog} onClose={handleClosePrivacyDialog}>
-        <DialogTitle>Privacy Settings</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Adjust your privacy settings, such as data sharing preferences and profile visibility.
-          </DialogContentText>
-          <FormControlLabel
-            control={<Switch defaultChecked />}
-            label="Share my data with third parties"
-          />
-          <FormControlLabel
-            control={<Switch />}
-            label="Make my profile visible to others"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClosePrivacyDialog} color="secondary">Cancel</Button>
-          <Button onClick={handleClosePrivacyDialog} color="primary">Save</Button>
+          <Button onClick={handleCloseSecurityDialog} color="secondary">Cancelar</Button>
+          <Button
+            onClick={handleChangePassword}
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : 'Guardar'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

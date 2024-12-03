@@ -34,6 +34,7 @@ const UserDashboard = () => {
   const [currentSection, setCurrentSection] = useState('courses');
   const [currentPage, setCurrentPage] = useState(1);
   const [courses, setCourses] = useState([]);
+  const [courseDetails, setCourseDetails] = useState({});  // Estado para almacenar los detalles de los cursos (incluido instructor)
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -46,6 +47,30 @@ const UserDashboard = () => {
     }
   }, []);
 
+  // Función para obtener el nombre del curso y el nombre del instructor
+  const fetchCourseDetails = async (courseID) => {
+    try {
+      const response = await axios.post('http://localhost:8081/graphql', {
+        query: `
+          query {
+            cursoByID(courseID: ${courseID}) {
+              title
+              instructorName
+            }
+          }
+        `,
+      });
+      return {
+        title: response.data.data.cursoByID?.title || "Unknown Course",
+        instructorName: response.data.data.cursoByID?.instructorName || "Unknown Instructor",
+      };
+    } catch (error) {
+      console.error('Error al obtener los detalles del curso:', error);
+      return { title: "Error al obtener el nombre", instructorName: "Error al obtener el instructor" };
+    }
+  };
+
+  // Función para obtener los cursos
   const fetchCourses = async (email) => {
     setLoading(true);
     try {
@@ -63,6 +88,14 @@ const UserDashboard = () => {
 
       const fetchedCourses = response.data.data.getCoursesByEmail || [];
       setCourses(fetchedCourses);
+
+      // Obtener los detalles de los cursos (nombre y instructor)
+      const details = {};
+      for (const course of fetchedCourses) {
+        const courseDetailsData = await fetchCourseDetails(course.courseID);
+        details[course.courseID] = courseDetailsData;
+      }
+      setCourseDetails(details);  // Actualiza los detalles de los cursos en el estado
     } catch (error) {
       console.error('Error al obtener los cursos:', error);
     } finally {
@@ -92,13 +125,12 @@ const UserDashboard = () => {
                 <Card elevation={3}>
                   <CardContent>
                     <Typography variant="h6" color="primary">
-                      Course ID: {course.courseID}
+                      Course: {courseDetails[course.courseID]?.title || "Loading..."} {/* Muestra el nombre del curso */}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Email: {course.email}
+                      Instructor: {courseDetails[course.courseID]?.instructorName || "Loading..."} {/* Muestra el nombre del instructor */}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      ID Asociado: {course.id}
                     </Typography>
                   </CardContent>
                 </Card>

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import {
   Paper, Typography, Button, List, ListItem, ListItemText, Divider, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, TextField, CircularProgress
+  DialogContentText, DialogTitle, TextField, CircularProgress, Box
 } from '@mui/material';
 import axios from 'axios';
+import SecurityIcon from '@mui/icons-material/Security';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import LockIcon from '@mui/icons-material/Lock';
 
 const UserSettings = () => {
   const [openSecurityDialog, setOpenSecurityDialog] = useState(false);
@@ -44,7 +48,6 @@ const UserSettings = () => {
         `,
       });
 
-      // Si hay errores, se muestran
       if (response.data.errors) {
         setError('Error al actualizar la contraseña. Verifica que la contraseña actual sea correcta.');
       } else {
@@ -58,62 +61,112 @@ const UserSettings = () => {
   };
 
   return (
-    <Paper elevation={3} sx={{ padding: 3, borderRadius: 2, maxWidth: 600, margin: '0 auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Configuración
-      </Typography>
+    <Paper
+      elevation={6}
+      sx={{
+        padding: 4,
+        borderRadius: 3,
+        maxWidth: 600,
+        margin: '2rem auto',
+        background: 'linear-gradient(to right, #f8f9fa, #e9ecef)',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <Box display="flex" alignItems="center" mb={3}>
+        <LockIcon fontSize="large" color="primary" />
+        <Typography variant="h4" ml={2} fontWeight="bold">
+          Configuración de Cuenta
+        </Typography>
+      </Box>
 
       <List>
-        {/* Seguridad de la cuenta */}
         <ListItem>
           <ListItemText
-            primary="Seguridad de la cuenta"
-            secondary="Cambia tu contraseña."
+            primary={
+              <Typography variant="h6" fontWeight="bold">
+                Seguridad de la cuenta
+              </Typography>
+            }
+            secondary="Actualiza tu contraseña para mejorar la seguridad."
           />
-          <Button variant="contained" color="primary" onClick={handleOpenSecurityDialog}>
-            Editar Seguridad
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SecurityIcon />}
+            onClick={handleOpenSecurityDialog}
+            sx={{ textTransform: 'capitalize' }}
+          >
+            Cambiar Contraseña
           </Button>
         </ListItem>
-        <Divider variant="middle" />
+        <Divider variant="middle" sx={{ my: 2 }} />
       </List>
 
-      {/* Cuadro de diálogo para la seguridad de la cuenta */}
       <Dialog open={openSecurityDialog} onClose={handleCloseSecurityDialog}>
-        <DialogTitle>Cambiar Contraseña</DialogTitle>
+        <DialogTitle>
+          <Box display="flex" alignItems="center">
+            <SecurityIcon color="primary" />
+            <Typography variant="h6" ml={1}>
+              Cambiar Contraseña
+            </Typography>
+          </Box>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Ingresa tu contraseña actual y la nueva para actualizar la seguridad de tu cuenta.
+            Por favor, ingresa tu contraseña actual y la nueva contraseña para
+            actualizar la seguridad de tu cuenta.
           </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Contraseña Actual"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-          <TextField
-            margin="dense"
-            label="Nueva Contraseña"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          {error && <Typography color="error">{error}</Typography>}
-          {successMessage && <Typography color="primary">{successMessage}</Typography>}
+          <Box mt={2}>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Contraseña Actual"
+              type="password"
+              fullWidth
+              variant="outlined"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              margin="dense"
+              label="Nueva Contraseña"
+              type="password"
+              fullWidth
+              variant="outlined"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </Box>
+          {error && (
+            <Typography color="error" mt={2}>
+              {error}
+            </Typography>
+          )}
+          {successMessage && (
+            <Typography color="primary" mt={2}>
+              {successMessage}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseSecurityDialog} color="secondary">Cancelar</Button>
+          <Button
+            onClick={handleCloseSecurityDialog}
+            startIcon={<CancelIcon />}
+            color="secondary"
+            sx={{ textTransform: 'capitalize' }}
+          >
+            Cancelar
+          </Button>
           <Button
             onClick={handleChangePassword}
+            startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
             color="primary"
             disabled={loading}
+            variant="contained"
+            sx={{ textTransform: 'capitalize' }}
           >
-            {loading ? <CircularProgress size={24} /> : 'Guardar'}
+            {loading ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>

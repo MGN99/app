@@ -32,6 +32,7 @@ const MainPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  
 
   const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
 
@@ -98,39 +99,41 @@ const MainPage = () => {
   };
 
   const handleaddToCartbyEmail = async () => {
-    if (email) {
+    if (!email || !selectedCourse)
+      return;
+  
+    try {
       console.log("Iniciando proceso para añadir al carrito...");
-      try {
-        const response = await axios.post(API_URL2, {
-          query: `
-            mutation addToCartbyEmail {
-              addToCartbyEmail(email: "${email}", courseID: "${selectedCourse.courseID}") {
-                cartID
-                userID
-                courseID
-              }
+  
+      // Realizar la mutación en el backend
+      const response = await axios.post(API_URL2, {
+        query: `
+          mutation {
+            addToCartbyEmail(email: "${email}", courseID: "${selectedCourse.courseID}") {
+              cartID
+              userID
+              courseID
             }
-          `
-        });
-
-        // Lógica para añadir el curso al estado del carrito
-        const existingItem = cartItems.find(item => item.courseID === selectedCourse.courseID);
-
-        if (existingItem) {
-          addToCartbyEmail({
-            ...existingItem,
-            quantity: existingItem.quantity + 1,
-          });
-        } else {
-          addToCartbyEmail({ ...selectedCourse, quantity: 1 });
-        }
-
-        setIsModalOpen(false);
-        console.log("Curso añadido al carrito:", response.data);
-      } catch (error) {
-        console.error('Error al añadir el curso al carrito:', error);
+          }
+        `
+      });
+  
+      if (response.data.errors) {
+        console.error("Error en la mutación:", response.data.errors);
+        return;
       }
+  
+      // Añadir al carrito en el estado global
+      addToCartbyEmail({ ...selectedCourse, quantity: 1 });
+  
+      setIsModalOpen(false); // Cerrar el modal
+      console.log("Curso añadido al carrito:", selectedCourse);
+      
+    } catch (error) {
+      alert(error);
+      console.error('Error al añadir el curso al carrito:', error);
     }
+    
   };
 
   const filteredCourses = courses
@@ -331,7 +334,7 @@ const MainPage = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleaddToCartbyEmail}
+            onClick={() => handleaddToCartbyEmail(selectedCourse)}
             sx={{ mt: 2 }}
           >
             Añadir al carrito

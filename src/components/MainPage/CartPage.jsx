@@ -1,26 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { viewCartByEmail, removeFromCart } from '../MainPage/CartService';
-import { Button, Typography, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
-import useCartStore from './CartStore'; // Ajusta la ruta según tu estructura
+import {
+  Button,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Container,
+  Card,
+  CardContent,
+  CardActions,
+  Divider,
+  Box,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
+import useCartStore from './CartStore';
 import axios from 'axios';
 
 const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [purchaseStatus, setPurchaseStatus] = useState(''); // Estado para mostrar el mensaje de compra
-  const email = localStorage.getItem('email'); // Usamos el email actual
+  const [purchaseStatus, setPurchaseStatus] = useState('');
+  const email = localStorage.getItem('email');
   const { cartItems, removeFromCart: removeItemFromStore } = useCartStore();
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      if (!email) return; // Si no hay usuario, no cargar nada
+      if (!email) return;
 
-      setLoading(true); // Activar el loading al cargar nuevos datos
-
+      setLoading(true);
       try {
         const data = await viewCartByEmail(email);
         if (data) {
-          // Actualizar el carrito en Zustand con los datos recibidos del backend
           useCartStore.setState({ cartItems: data });
         }
       } catch (err) {
@@ -30,13 +43,13 @@ const CartPage = () => {
       }
     };
 
-    fetchCartItems(); // Llamar cada vez que `email` cambie
+    fetchCartItems();
   }, [email]);
 
   const handleRemoveFromCart = async (courseID) => {
     try {
       await removeFromCart(courseID);
-      removeItemFromStore(courseID); // Remover del estado de Zustand usando la función original
+      removeItemFromStore(courseID);
     } catch (err) {
       setError(err.message);
     }
@@ -56,9 +69,8 @@ const CartPage = () => {
         email,
       });
 
-      // Verificar si la respuesta contiene la URL de redirección
       if (response.data && response.data.url) {
-        window.location.href = response.data.url; // Redirigir a la URL de Webpay
+        window.location.href = response.data.url;
       } else {
         setPurchaseStatus('Error al realizar la compra.');
       }
@@ -69,59 +81,99 @@ const CartPage = () => {
       setLoading(false);
     }
   };
-  
+
   if (loading) {
-    return <Typography variant="h6">Cargando el carrito...</Typography>;
+    return (
+      <Container sx={{ textAlign: 'center', mt: 4 }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Cargando el carrito...
+        </Typography>
+      </Container>
+    );
   }
 
   if (error) {
-    return <Typography variant="h6" color="error">{error}</Typography>;
+    return (
+      <Container sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
   }
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
         Tu Carrito de Compras
       </Typography>
+
       {cartItems.length === 0 ? (
-        <Typography variant="body1">Tu carrito está vacío.</Typography>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="body1" color="textSecondary">
+            Tu carrito está vacío.
+          </Typography>
+        </Box>
       ) : (
-        <List>
-          {cartItems.map(item => (
-            <ListItem key={item.courseID}>
-              <ListItemText
-                primary={`Curso ID: ${item.courseID}`} // Cambia esto según cómo obtengas el título
-              />
-              <ListItemSecondaryAction>
-                <Button variant="outlined" color="secondary" onClick={() => handleRemoveFromCart(item.courseID)}>
-                  Eliminar
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
-        </List>
+        <Card sx={{ mt: 4, padding: 3, boxShadow: 3 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Resumen de tu carrito
+            </Typography>
+            <List>
+              {cartItems.map((item) => (
+                <React.Fragment key={item.courseID}>
+                  <ListItem sx={{ alignItems: 'flex-start' }}>
+                    <ListItemText
+                      primary={`Curso: ${item.courseID}`}
+                      secondary="Descripción breve del curso"
+                      primaryTypographyProps={{
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                      }}
+                      secondaryTypographyProps={{
+                        color: 'text.secondary',
+                        fontSize: '0.9rem',
+                      }}
+                    />
+                    <ListItemSecondaryAction>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="small"
+                        onClick={() => handleRemoveFromCart(item.courseID)}
+                      >
+                        Eliminar
+                      </Button>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                  <Divider />
+                </React.Fragment>
+              ))}
+            </List>
+          </CardContent>
+
+          <CardActions sx={{ justifyContent: 'space-between', mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              Total de cursos: {cartItems.length}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlePurchase}
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : 'Comprar'}
+            </Button>
+          </CardActions>
+        </Card>
       )}
 
-      {/* Botón de Comprar */}
-      {cartItems.length > 0 && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handlePurchase}
-          disabled={loading}
-          sx={{ mt: 3 }}
-        >
-          {loading ? 'Procesando...' : 'Comprar'}
-        </Button>
-      )}
-
-      {/* Mostrar el estado de la compra */}
       {purchaseStatus && (
-        <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
-          {purchaseStatus}
-        </Typography>
+        <Box sx={{ mt: 4 }}>
+          <Alert severity="info">{purchaseStatus}</Alert>
+        </Box>
       )}
-    </div>
+    </Container>
   );
 };
 

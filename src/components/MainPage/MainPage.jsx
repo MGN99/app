@@ -32,7 +32,6 @@ const MainPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  
 
   const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
 
@@ -45,7 +44,6 @@ const MainPage = () => {
     }
     if (storedUsername) {
       setUsername(storedUsername);
-      
     }
     fetchCourses(); // Llama a la función para obtener cursos
     console.log('Stored username from localStorage:', storedUsername);
@@ -101,10 +99,10 @@ const MainPage = () => {
   const handleaddToCartbyEmail = async () => {
     if (!email || !selectedCourse)
       return;
-  
+
     try {
       console.log("Iniciando proceso para añadir al carrito...");
-  
+
       // Realizar la mutación en el backend
       const response = await axios.post(API_URL2, {
         query: `
@@ -117,15 +115,15 @@ const MainPage = () => {
           }
         `
       });
-  
+
       if (response.data.errors) {
         console.error("Error en la mutación:", response.data.errors);
         return;
       }
-  
+
       // Añadir al carrito en el estado global
       addToCartbyEmail({ ...selectedCourse, quantity: 1 });
-  
+
       setIsModalOpen(false); // Cerrar el modal
       console.log("Curso añadido al carrito:", selectedCourse);
       
@@ -153,10 +151,10 @@ const MainPage = () => {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 400,
-    bgcolor: 'background.paper',
+    bgcolor: '#f0f4f8', // Color de fondo suave
     boxShadow: 24,
     p: 4,
-    borderRadius: '8px',
+    borderRadius: '12px',
     outline: 'none',
   };
 
@@ -165,16 +163,16 @@ const MainPage = () => {
       {/* Header */}
       <AppBar
         position="static"
-        color="inherit"
+        color="transparent"
         elevation={0}
         sx={{
-          background: 'linear-gradient(90deg, #f5f5f5 0%, #eaeaea 100%)',
+          background: 'linear-gradient(90deg, #2196f3 0%, #4caf50 100%)',
           borderBottom: '1px solid #d0d0d0',
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', paddingX: 3 }}>
-          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', fontFamily: 'Georgia, serif' }}>
+          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', fontFamily: 'Georgia, serif', color: '#fff' }}>
             ένας
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -184,15 +182,26 @@ const MainPage = () => {
               size="small"
               sx={{
                 width: '400px',
-                backgroundColor: '#f9f9f9',
+                backgroundColor: '#fff',
                 borderRadius: '20px',
                 boxShadow: 'inset 0px 1px 3px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e0e0e0',
+                border: '1px solid #ccc',
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#ccc',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#4caf50',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#4caf50',
+                  },
+                },
               }}
             />
             {email ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Typography variant="body1" sx={{ mr: 2 }}>
+                <Typography variant="body1" sx={{ mr: 2, color: '#fff' }}>
                   Bienvenido, {email}
                 </Typography>
                 <Badge
@@ -202,38 +211,40 @@ const MainPage = () => {
                     '& .MuiBadge-badge': {
                       top: 10,
                       right: -5,
+                      backgroundColor: '#ff5722',
+                      color: '#fff',
                     },
                   }}
                 >
                   <Link to="/cart">
-                    <ShoppingCartIcon sx={{ cursor: 'pointer' }} />
+                    <ShoppingCartIcon sx={{ cursor: 'pointer', color: '#fff' }} />
                   </Link>
                 </Badge>
                 {/* Botón de acceso al Panel */}
-        <Button
-          color="primary"
-          component={Link}
-          to="/dashboard"
-          sx={{
-            minWidth: 'auto',
-            backgroundColor: '#e0e0e0',
-            color: '#333',
-            padding: '6px',
-            borderRadius: '50%',
-            '&:hover': { backgroundColor: '#d4d4d4' },
-          }}
-        >
-          <AccountCircleIcon />
-        </Button>
-        <Button
-          color="primary"
-          onClick={handleLogout}
-          sx={{
-            backgroundColor: '#e0e0e0',
-            color: '#333',
-            '&:hover': { backgroundColor: '#d4d4d4' },
-          }}
-        >
+                <Button
+                  color="primary"
+                  component={Link}
+                  to="/dashboard"
+                  sx={{
+                    minWidth: 'auto',
+                    backgroundColor: '#81c784',
+                    color: '#fff',
+                    padding: '6px',
+                    borderRadius: '50%',
+                    '&:hover': { backgroundColor: '#66bb6a' },
+                  }}
+                >
+                  <AccountCircleIcon />
+                </Button>
+                <Button
+                  color="primary"
+                  onClick={handleLogout}
+                  sx={{
+                    backgroundColor: '#81c784',
+                    color: '#fff',
+                    '&:hover': { backgroundColor: '#66bb6a' },
+                  }}
+                >
                   Logout
                 </Button>
               </div>
@@ -246,9 +257,10 @@ const MainPage = () => {
                   to="/login"
                   sx={{
                     mr: 1,
-                    borderColor: '#9c9c9c',
-                    color: '#555',
-                    '&:hover': { backgroundColor: '#f0f0f0', borderColor: '#aaa' },
+                    borderColor: '#81c784',
+                    color: '#fff',
+                    borderRadius: '20px',
+                    '&:hover': { backgroundColor: 'rgba(129, 199, 132, 0.1)', borderColor: '#66bb6a' },
                   }}
                 >
                   Login
@@ -261,7 +273,8 @@ const MainPage = () => {
                   sx={{
                     backgroundColor: '#4caf50',
                     color: '#fff',
-                    '&:hover': { backgroundColor: '#45a047' },
+                    borderRadius: '20px',
+                    '&:hover': { backgroundColor: '#43a047' },
                   }}
                 >
                   Register
@@ -272,35 +285,12 @@ const MainPage = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Tabs for category navigation */}
-      <Tabs
-        value={false}
-        centered
-        sx={{
-          borderBottom: '1px solid #e0e0e0',
-          backgroundColor: '#f5f5f5',
-          '& .MuiTab-root': {
-            minWidth: 'auto',
-            paddingX: 4,
-            fontWeight: 500,
-            fontFamily: 'Arial, sans-serif',
-            '&:hover': { color: '#3f51b5' },
-          },
-        }}
-      >
-        <Tab label="Desarrollo web" />
-        <Tab label="Ciencias de la información" />
-        <Tab label="Desarrollo móvil" />
-        <Tab label="Lenguajes de programación" />
-        <Tab label="Testeo de software" />
-      </Tabs>
-
       {/* Main Content */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom color="#2e7d32">
           Cursos de Desarrollo
         </Typography>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
+        <Typography variant="body1" color="#4caf50" gutterBottom>
           Cursos para dar tus primeros pasos. Descubre cursos de expertos experimentados del mundo real.
         </Typography>
 
@@ -316,6 +306,15 @@ const MainPage = () => {
                   instructor={course.instructorName}
                   imageURL={course.imageURL}
                   onClick={() => handleCourseClick(course)}
+                  sx={{
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                    borderRadius: '12px',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+                    },
+                  }}
                 />
               </Grid>
             ))
@@ -326,16 +325,20 @@ const MainPage = () => {
       {/* Modal for course details */}
       <Modal open={isModalOpen} onClose={closeModal}>
         <Box sx={modalStyle}>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h6" component="h2" color="#2e7d32">
             {selectedCourse?.title}
           </Typography>
-          <Typography sx={{ mt: 2 }}>{selectedCourse?.description}</Typography>
-          <Typography sx={{ mt: 2 }}>Precio: ${selectedCourse?.price}</Typography>
+          <Typography sx={{ mt: 2 }} color="#555">
+            {selectedCourse?.description}
+          </Typography>
+          <Typography sx={{ mt: 2 }} color="#4caf50">
+            Precio: ${selectedCourse?.price}
+          </Typography>
           <Button
             variant="contained"
-            color="primary"
+            color="success"
             onClick={() => handleaddToCartbyEmail(selectedCourse)}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, borderRadius: '20px' }}
           >
             Añadir al carrito
           </Button>

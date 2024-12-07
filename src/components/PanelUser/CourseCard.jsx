@@ -32,9 +32,6 @@ const CourseCard = ({ title, instructor, progress, imageURL, onClick }) => {
         <Typography variant="body2" color="text.secondary">
           Instructor: {instructor}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Progreso: {progress}%
-        </Typography>
       </CardContent>
       <CardActions sx={{ justifyContent: 'flex-end' }}>
         <Button size="small" color="primary">

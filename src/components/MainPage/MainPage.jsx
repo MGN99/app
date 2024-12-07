@@ -20,6 +20,7 @@ import axios from 'axios';
 import CourseCard from '../PanelUser/CourseCard';
 import useCartStore from '../MainPage/CartStore';
 
+
 const API_URL = 'http://localhost:8081/graphql';
 const API_URL2 = 'http://localhost:8080/graphql';
 
@@ -32,6 +33,7 @@ const MainPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  
 
   const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
 

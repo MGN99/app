@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Importar el hook
 import useCartStore from './CartStore';
 import axios from 'axios';
 
@@ -25,6 +26,7 @@ const CartPage = () => {
   const [purchaseStatus, setPurchaseStatus] = useState('');
   const email = localStorage.getItem('email');
   const { cartItems, removeFromCart: removeItemFromStore } = useCartStore();
+  const navigate = useNavigate(); // Inicializar el hook
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -173,6 +175,13 @@ const CartPage = () => {
           <Alert severity="info">{purchaseStatus}</Alert>
         </Box>
       )}
+
+      {/* Botón para regresar a la página principal */}
+      <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Button variant="outlined" color="primary" onClick={() => navigate('/')}>
+          Volver a la Página Principal
+        </Button>
+      </Box>
     </Container>
   );
 };

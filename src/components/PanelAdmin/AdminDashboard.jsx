@@ -4,13 +4,14 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'; 
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminCourses from './AdminCourses';
 import AdminUsers from './AdminUsers';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';  // Asegúrate de tener esto importado
 
 const API_URL = 'http://localhost:8080/graphql';
 const API_URL2 = 'http://localhost:8081/graphql';
+
 const AdminDashboard = () => {
   const [selectedView, setSelectedView] = useState('dashboard');
   const [users, setUsers] = useState([]);
@@ -18,6 +19,7 @@ const AdminDashboard = () => {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();  // Hook de navegación
 
   // Función para obtener los cursos
   const fetchCourses = async () => {
@@ -79,15 +81,6 @@ const AdminDashboard = () => {
   const totalUsers = users.length;
   const totalCourses = courses.length;
 
-  // Datos de ejemplo para el gráfico
-  const data = [
-    { name: 'Jan', users: 120 },
-    { name: 'Feb', users: 200 },
-    { name: 'Mar', users: 150 },
-    { name: 'Apr', users: 300 },
-    { name: 'May', users: 280 },
-  ];
-
   const renderContent = () => {
     switch (selectedView) {
       case 'dashboard':
@@ -97,7 +90,6 @@ const AdminDashboard = () => {
               Admin Panel
             </Typography>
             <Typography variant="h6">Bienvenido al Panel de Administración</Typography>
-            
 
             <Grid container spacing={3} sx={{ mt: 2 }}>
               {/* Tarjeta de Total de Usuarios */}
@@ -127,25 +119,7 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
               </Grid>
-
-              
             </Grid>
-
-            {/* Sección de gráfico */}
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h5" gutterBottom>
-                Crecimiento de Usuarios
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data}>
-                  <CartesianGrid stroke="#ccc" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="users" stroke="#8884d8" />
-                </LineChart>
-              </ResponsiveContainer>
-            </Box>
           </Box>
         );
       case 'courses':
@@ -158,8 +132,12 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    // Implement your logout logic here
-    console.log('Logging out...');
+    // Limpiar datos de autenticación (por ejemplo, token en localStorage o sessionStorage)
+    localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessToken');
+    
+    // Redirigir al login
+    navigate('/login');
   };
 
   return (

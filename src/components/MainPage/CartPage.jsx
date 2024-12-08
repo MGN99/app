@@ -24,6 +24,7 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [purchaseStatus, setPurchaseStatus] = useState('');
+  const [courses, setCourses] = useState({}); // Estado para almacenar los nombres de los cursos
   const email = localStorage.getItem('email');
   const { cartItems, removeFromCart: removeItemFromStore } = useCartStore();
   const navigate = useNavigate(); // Inicializar el hook
@@ -37,6 +38,7 @@ const CartPage = () => {
         const data = await viewCartByEmail(email);
         if (data) {
           useCartStore.setState({ cartItems: data });
+          await fetchCourseNames(data); // Fetch the course names when cart items are loaded
         }
       } catch (err) {
         setError(err.message);
@@ -47,6 +49,29 @@ const CartPage = () => {
 
     fetchCartItems();
   }, [email]);
+
+  const fetchCourseNames = async (cartItems) => {
+    const courseRequests = cartItems.map(async (item) => {
+      const response = await axios.post('http://localhost:8081/graphql', {
+        query: `
+          query {
+            cursoByID(courseID: ${item.courseID}) {
+              title
+            }
+          }
+        `,
+      });
+      return { courseID: item.courseID, title: response.data.data.cursoByID.title };
+    });
+
+    // Esperamos a que todas las peticiones terminen y luego actualizamos el estado
+    const courseData = await Promise.all(courseRequests);
+    const courseNames = courseData.reduce((acc, { courseID, title }) => {
+      acc[courseID] = title;
+      return acc;
+    }, {});
+    setCourses(courseNames);
+  };
 
   const handleRemoveFromCart = async (courseID) => {
     try {
@@ -126,8 +151,7 @@ const CartPage = () => {
                 <React.Fragment key={item.courseID}>
                   <ListItem sx={{ alignItems: 'flex-start' }}>
                     <ListItemText
-                      primary={`Curso: ${item.courseID}`}
-                      secondary="Descripción breve del curso"
+                      primary={`Curso: ${courses[item.courseID] || 'Cargando...'}`}
                       primaryTypographyProps={{
                         fontWeight: 'bold',
                         fontSize: '1rem',

@@ -7,9 +7,8 @@ import {
   Typography,
   CircularProgress,
   Box,
-  Grid,
-  Link,
   Paper,
+  Link, // Importa Link de Material UI
 } from '@mui/material';
 import { styled } from '@mui/system';
 import useCartStore from '../MainPage/CartStore';
@@ -67,7 +66,13 @@ const Login = () => {
         localStorage.setItem('authenticated', 'true');
         localStorage.setItem('email', email);
         localStorage.setItem('username', username);  // Guarda el username
-        navigate('/');
+
+        // Verifica si el correo es "admin@gmail.com"
+        if (email === "admin@gmail.com" && password === "admin123") {
+          navigate('/adminDashboard'); // Navega a la página del administrador
+        } else {
+          navigate('/'); // Navega a la página principal
+        }
       } else {
         setError('Login failed');
       }
@@ -107,6 +112,14 @@ const Login = () => {
           <StyledButton type="submit" fullWidth disabled={loading} sx={{ mt: 3 }}>
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Login Now'}
           </StyledButton>
+          
+          {/* Agregar enlace para crear una cuenta */}
+          <Typography variant="body2" align="center" sx={{ mt: 2, color: '#555' }}>
+            ¿No tienes una cuenta?{' '}
+            <Link href="/register" variant="body2" sx={{ color: '#1F3B60' }}>
+              Crear cuenta aquí
+            </Link>
+          </Typography>
         </Box>
       </Paper>
     </StyledBackground>

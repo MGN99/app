@@ -33,6 +33,7 @@ const MainPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   
 
   const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
@@ -137,15 +138,16 @@ const MainPage = () => {
   };
 
   const filteredCourses = courses
-    .filter((course) => {
-      if (selectedCategory === '') return true;
-      return course.category === selectedCategory;
-    })
-    .sort((a, b) => {
-      if (priceOrder === 'asc') return parseFloat(a.price) - parseFloat(b.price);
-      if (priceOrder === 'desc') return parseFloat(b.price) - parseFloat(a.price);
-      return 0;
-    });
+  .filter((course) => {
+    const matchesCategory = selectedCategory === '' || course.category === selectedCategory;
+    const matchesSearchQuery = course.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearchQuery;
+  })
+  .sort((a, b) => {
+    if (priceOrder === 'asc') return parseFloat(a.price) - parseFloat(b.price);
+    if (priceOrder === 'desc') return parseFloat(b.price) - parseFloat(a.price);
+    return 0;
+  });
 
   const modalStyle = {
     position: 'absolute',
@@ -182,6 +184,8 @@ const MainPage = () => {
               variant="outlined"
               placeholder="Buscar cualquier cosa"
               size="small"
+              value={searchQuery} // Agregar este valor
+              onChange={(e) => setSearchQuery(e.target.value)} // Agregar el controlador
               sx={{
                 width: '400px',
                 backgroundColor: '#fff',

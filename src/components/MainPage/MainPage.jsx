@@ -13,13 +13,16 @@ import {
   Box,
   Container,
   Badge,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import axios from 'axios';
 import CourseCard from '../PanelUser/CourseCard';
 import useCartStore from '../MainPage/CartStore';
-
 
 const API_URL = 'http://localhost:8081/graphql';
 const API_URL2 = 'http://localhost:8080/graphql';
@@ -34,7 +37,6 @@ const MainPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
 
   const { cartItems, addToCartbyEmail, fetchCartItems, clearCart } = useCartStore();
 
@@ -148,6 +150,9 @@ const MainPage = () => {
     if (priceOrder === 'desc') return parseFloat(b.price) - parseFloat(a.price);
     return 0;
   });
+
+  // Obtener una lista de categorías únicas
+  const categories = Array.from(new Set(courses.map((course) => course.category)));
 
   const modalStyle = {
     position: 'absolute',
@@ -299,6 +304,36 @@ const MainPage = () => {
         <Typography variant="body1" color="#4caf50" gutterBottom>
           Cursos para dar tus primeros pasos. Descubre cursos de expertos experimentados del mundo real.
         </Typography>
+
+        {/* Agregamos los selectores de categoría y orden de precio */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Categoría</InputLabel>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              label="Categoría"
+            >
+              <MenuItem value="">Todas</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Ordenar por precio</InputLabel>
+            <Select
+              value={priceOrder}
+              onChange={(e) => setPriceOrder(e.target.value)}
+              label="Ordenar por precio"
+            >
+              <MenuItem value="">Ninguno</MenuItem>
+              <MenuItem value="asc">Menor a mayor</MenuItem>
+              <MenuItem value="desc">Mayor a menor</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
 
         {/* Course List */}
         <Grid container spacing={3}>

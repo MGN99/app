@@ -18,7 +18,7 @@ const UserProfile = () => {
   const fetchUserData = async (email) => {
     try {
       // Obtener el username con el email
-      const response = await axios.post('http://localhost:8081/graphql', {
+      const response = await axios.post('http://localhost:8080/graphql', {
         query: `
           query {
             obtenerUsernamePorEmail(email: "${email}")
@@ -29,7 +29,7 @@ const UserProfile = () => {
       const username = response.data.data.obtenerUsernamePorEmail;
       
       // Obtener los detalles del usuario (nombre completo y email)
-      const userResponse = await axios.post('http://localhost:8081/graphql', {
+      const userResponse = await axios.post('http://localhost:8080/graphql', {
         query: `
           query {
             userByUsername(username: "${username}") {
@@ -60,7 +60,7 @@ const UserProfile = () => {
       
       // Enviar las mutaciones en secuencia
       // 1. Actualizar nombre completo
-      await axios.post('http://localhost:8081/graphql', {
+      await axios.post('http://localhost:8080/graphql', {
         query: `
           mutation {
             actualizarNombreCompleto(email: "${email}", newNameLastName: "${fullNameState}") {
@@ -73,7 +73,7 @@ const UserProfile = () => {
       });
 
       // 2. Actualizar correo electrónico
-      await axios.post('http://localhost:8081/graphql', {
+      await axios.post('http://localhost:8080/graphql', {
         query: `
           mutation {
             actualizarEmail(email: "${email}", newEmail: "${emailState}") {
@@ -86,7 +86,7 @@ const UserProfile = () => {
       });
 
       // 3. Actualizar nombre de usuario
-      await axios.post('http://localhost:8081/graphql', {
+      await axios.post('http://localhost:8080/graphql', {
         query: `
           mutation {
             actualizarUsernameConEmail(email: "${email}", newUsername: "${usernameState}") {

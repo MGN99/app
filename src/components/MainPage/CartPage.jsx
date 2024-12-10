@@ -16,7 +16,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Importar el hook
+import { useNavigate } from 'react-router-dom';
 import useCartStore from './CartStore';
 import axios from 'axios';
 
@@ -24,10 +24,11 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [purchaseStatus, setPurchaseStatus] = useState('');
-  const [courses, setCourses] = useState({}); // Estado para almacenar los nombres de los cursos
+  const [courses, setCourses] = useState({});
+  const [total, setTotal] = useState(0); // Estado para el total del carrito
   const email = localStorage.getItem('email');
   const { cartItems, removeFromCart: removeItemFromStore } = useCartStore();
-  const navigate = useNavigate(); // Inicializar el hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -38,7 +39,7 @@ const CartPage = () => {
         const data = await viewCartByEmail(email);
         if (data) {
           useCartStore.setState({ cartItems: data });
-          await fetchCourseNames(data); // Fetch the course names when cart items are loaded
+          await fetchCourseNamesAndPrices(data);
         }
       } catch (err) {
         setError(err.message);
@@ -50,33 +51,39 @@ const CartPage = () => {
     fetchCartItems();
   }, [email]);
 
-  const fetchCourseNames = async (cartItems) => {
+  const fetchCourseNamesAndPrices = async (cartItems) => {
     const courseRequests = cartItems.map(async (item) => {
       const response = await axios.post('http://localhost:8081/graphql', {
         query: `
           query {
             cursoByID(courseID: ${item.courseID}) {
               title
+              price
             }
           }
         `,
       });
-      return { courseID: item.courseID, title: response.data.data.cursoByID.title };
+      const course = response.data.data.cursoByID;
+      return { courseID: item.courseID, title: course.title, price: course.price };
     });
 
-    // Esperamos a que todas las peticiones terminen y luego actualizamos el estado
     const courseData = await Promise.all(courseRequests);
-    const courseNames = courseData.reduce((acc, { courseID, title }) => {
-      acc[courseID] = title;
+    const courseNames = courseData.reduce((acc, { courseID, title, price }) => {
+      acc[courseID] = { title, price };
       return acc;
     }, {});
     setCourses(courseNames);
+
+    // Calcular el total del carrito
+    const totalPrice = courseData.reduce((sum, { price }) => sum + price, 0);
+    setTotal(totalPrice);
   };
 
   const handleRemoveFromCart = async (courseID) => {
     try {
       await removeFromCart(courseID);
       removeItemFromStore(courseID);
+      setTotal((prevTotal) => prevTotal - courses[courseID].price); // Actualizar el total
     } catch (err) {
       setError(err.message);
     }
@@ -151,7 +158,8 @@ const CartPage = () => {
                 <React.Fragment key={item.courseID}>
                   <ListItem sx={{ alignItems: 'flex-start' }}>
                     <ListItemText
-                      primary={`Curso: ${courses[item.courseID] || 'Cargando...'}`}
+                      primary={`Curso: ${courses[item.courseID]?.title || 'Cargando...'}`}
+                      secondary={`Precio: $${courses[item.courseID]?.price || 'Cargando...'}`}
                       primaryTypographyProps={{
                         fontWeight: 'bold',
                         fontSize: '1rem',
@@ -182,6 +190,9 @@ const CartPage = () => {
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
               Total de cursos: {cartItems.length}
             </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'green' }}>
+              Total del carrito: ${total.toFixed(2)}
+            </Typography>
             <Button
               variant="contained"
               color="primary"
@@ -200,7 +211,6 @@ const CartPage = () => {
         </Box>
       )}
 
-      {/* Botón para regresar a la página principal */}
       <Box sx={{ textAlign: 'center', mt: 4 }}>
         <Button variant="outlined" color="primary" onClick={() => navigate('/')}>
           Volver a la Página Principal
